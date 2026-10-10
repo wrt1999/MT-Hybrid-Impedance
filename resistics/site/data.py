@@ -15,7 +15,7 @@ from resistics.time.utils import getTimeReader
 
 class SiteData(ResisticsBase):
     """Class for holding site information
-    用于保存站点信息的类
+    
     Attributes
     ----------
     timePath : int
@@ -76,32 +76,32 @@ class SiteData(ResisticsBase):
 
     def __init__(
         self,
-        siteName: str,              # 站点名称
-        timePath: str,              # 时间序列数据路径
-        specPath: str,              # 频谱数据路径
-        statPath: str,              # 统计学信息路径
-        maskPath: str,              # 掩码数据路径
-        transFuncPath: str,         # 传输函数路径
+        siteName: str,              
+        timePath: str,              
+        specPath: str,              
+        statPath: str,              
+        maskPath: str,              
+        transFuncPath: str,         
     ) -> None:
-        self.siteName: str = siteName                                         # 站点
-        self.timePath: str = os.path.join(timePath, siteName)                 # 专属
-        self.specPath: str = os.path.join(specPath, siteName)                 # 路
-        self.statPath: str = os.path.join(statPath, siteName)                 # 径
-        self.maskPath: str = os.path.join(maskPath, siteName)                 # 创
-        self.transFuncPath: str = os.path.join(transFuncPath, siteName)       # 建
+        self.siteName: str = siteName                                         
+        self.timePath: str = os.path.join(timePath, siteName)                 
+        self.specPath: str = os.path.join(specPath, siteName)                 
+        self.statPath: str = os.path.join(statPath, siteName)                 
+        self.maskPath: str = os.path.join(maskPath, siteName)                 
+        self.transFuncPath: str = os.path.join(transFuncPath, siteName)       
         # measurement information
-        self.measurements: List[str] = []               # 时间序列测量文件列表
-        self.spectra: List[str] = []                    # 频谱数据文件列表
-        self.statistics: List[str] = []                 # 统计学信息文件列表
-        self.transferFunctions: List[str] = []          # 传输函数文件列表
-        self.siteStart = datetime.now()                 # 站点数据开始时间
-        self.siteEnd = datetime.now()                   # 站点数据结束时间
+        self.measurements: List[str] = []               
+        self.spectra: List[str] = []                    
+        self.statistics: List[str] = []                 
+        self.transferFunctions: List[str] = []          
+        self.siteStart = datetime.now()                 
+        self.siteEnd = datetime.now()                   
         self.readers: Dict = {}
-        self.starts: Dict[str, datetime] = {}           # 各测量开始时间
-        self.ends: Dict[str, datetime] = {}             # 各测量结束时间
-        self.fs: Dict[str, float] = {}                  # 各测量采样率字典
+        self.starts: Dict[str, datetime] = {}           
+        self.ends: Dict[str, datetime] = {}             
+        self.fs: Dict[str, float] = {}                  
         # refresh site data
-        self.refresh()                                  # 数据读取器字典
+        self.refresh()                                  
 
     def refresh(self):
         """ Refresh site information"""
@@ -153,7 +153,7 @@ class SiteData(ResisticsBase):
 
     def getMeasurements(self, sampleFreq: Union[None, float, int] = None) -> List[str]:
         """Get a list of measurements for a site
-        获取目标站点的测量数据列表
+        
         Parameters
         ----------
         sampleFreq : float, int, optional
