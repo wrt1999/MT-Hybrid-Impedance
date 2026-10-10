@@ -272,60 +272,60 @@ def viewTime(
         applyNotchOptions,
     )
     from resistics.common.plot import savePlot, plotOptionsTime
-    # 设置默认参数
+    
     options = {}
-    options["sites"]: List[str] = projData.sites                                                # 默认所有测站
-    options["sampleFreqs"]: Union[List[float], List[str]] = projData.getSampleFreqs()           # 默认所有采样频率
-    options["chans"]: List[str] = ["Ex", "Ey", "Hx", "Hy", "Hz"]                                # 默认所有5个通道
-    options["polreverse"]: Union[bool, Dict[str, bool]] = False                                 # 默认不反转极化
-    options["scale"]: Union[bool, Dict[str, float]] = False                                     # 默认不缩放
-    options["calibrate"]: bool = False                                                          # 默认不标定
-    options["normalise"]: bool = False                                                          # 默认不归一化
-    options["filter"]: Dict = {}                                                                # 默认无滤波
-    options["notch"]: List[float] = []                                                          # 默认无陷波
-    options["show"]: bool = True                                                                # 默认显示图形
-    options["save"]: bool = False                                                               # 默认不保存
-    options["plotoptions"]: Dict = plotOptionsTime()                                            # 获取时间序列绘图默认选项
-    options = parseKeywords(options, kwargs)                                                    # 使用用户参数覆盖默认值
+    options["sites"]: List[str] = projData.sites                                                
+    options["sampleFreqs"]: Union[List[float], List[str]] = projData.getSampleFreqs()           
+    options["chans"]: List[str] = ["Ex", "Ey", "Hx", "Hy", "Hz"]                                
+    options["polreverse"]: Union[bool, Dict[str, bool]] = False                                 
+    options["scale"]: Union[bool, Dict[str, float]] = False                                     
+    options["calibrate"]: bool = False                                                          
+    options["normalise"]: bool = False                                                          
+    options["filter"]: Dict = {}                                                                
+    options["notch"]: List[float] = []                                                          
+    options["show"]: bool = True                                                                
+    options["save"]: bool = False                                                               
+    options["plotoptions"]: Dict = plotOptionsTime()                                            
+    options = parseKeywords(options, kwargs)                                                    
 
-    # prepare calibrator(准备标定)
-    cal = getCalibrator(projData.calPath, projData.config)              # 准备标定器,用于数据标定
-    if options["calibrate"]:                                            # 如果需要标定，打印标定器信息
+    # prepare calibrator
+    cal = getCalibrator(projData.calPath, projData.config)              
+    if options["calibrate"]:                                            
         cal.printInfo()
 
-    # format startDate and endDate(格式化开始和结束时间字符串为datetime对象)
+    # format startDate and endDate
     start = datetime.strptime("{}.000".format(startDate), "%Y-%m-%d %H:%M:%S.%f")
     stop = datetime.strptime("{}.000".format(endDate), "%Y-%m-%d %H:%M:%S.%f")
-    # collect relevant data - dictionary to store timeData(相关数据采集——用于存储时间序列数据的字典结构)
-    timeDataAll = {}                                    # 创建字典存储所有时间数据
-    for site in options["sites"]:                       # 遍历所有指定的测站
-        siteData = projData.getSiteData(site)           # 获取测站数据对象
-        if isinstance(siteData, bool):                  # 如果测站不存在，跳过
+    # collect relevant data - dictionary to store timeData
+    timeDataAll = {}                                    
+    for site in options["sites"]:                       
+        siteData = projData.getSiteData(site)           
+        if isinstance(siteData, bool):                  
             # site does not exist
             continue
-        siteData.printInfo()                            # 打印测站信息
-        measurements = siteData.getMeasurements()       # 获取该测站的所有测量记录
-        timeDataAll[site] = {}                          # 为该测站创建数据存储字典
+        siteData.printInfo()                            
+        measurements = siteData.getMeasurements()       
+        timeDataAll[site] = {}                          
 
-        # loop over measurements and save data for each one(遍历该测站的所有测量记录)
+        # loop over measurements and save data for each one
         for meas in measurements:
-            sampleFreq = siteData.getMeasurementSampleFreq(meas)        # 采样频率
-            if sampleFreq not in options["sampleFreqs"]:                # 如果频率不在指定列表中，跳过
+            sampleFreq = siteData.getMeasurementSampleFreq(meas)        
+            if sampleFreq not in options["sampleFreqs"]:                
                 continue
 
-            # check if data contributes to user defined time period(检查数据是否涵盖用户定义的时间段)
-            siteStart = siteData.getMeasurementStart(meas)          # siteStart:(2023,10,21,5,40,14)
+            # check if data contributes to user defined time period
+            siteStart = siteData.getMeasurementStart(meas)          
             siteStop = siteData.getMeasurementEnd(meas)
             if siteStop < start or siteStart > stop:
                 continue
 
-            reader = siteData.getMeasurement(meas)                      # 获取该测量的数据读取器
-            # get the samples of the datetimes(获取日期时间样本集)
-            sampleStart, sampleStop = reader.time2sample(start, stop)           # 将时间转换为样本索引（找到对应时间点的数据位置）,sampleStart:0  sampleStop:1086705
+            reader = siteData.getMeasurement(meas)                      
+            # get the samples of the datetimes
+            sampleStart, sampleStop = reader.time2sample(start, stop)           
             # as the samples returned from time2sample are rounded use sample2time to get the appropriate start and end times for those samples
-            readStart, readStop = reader.sample2time(sampleStart, sampleStop)   # 将样本索引转换回精确时间(避免舍入误差)  readStart:(2023,10,21,5,40,14)
+            readStart, readStop = reader.sample2time(sampleStart, sampleStop)   
             # get the data for any available channels meaning even those sites with missing channels can be plotted
-            timeData = reader.getPhysicalData(readStart, readStop)              # 读取物理数据（电压值，可能已部分处理）
+            timeData = reader.getPhysicalData(readStart, readStop)              
 
             projectText(
                 "Plotting measurement {} of site {} between {} and {}".format(
@@ -333,73 +333,73 @@ def viewTime(
                 )
             )
 
-            # apply various options(# 应用数据预处理流水线（按顺序执行）)
-            applyPolarisationReversalOptions(options, timeData)             # 极化反转(默认False)
-            applyScaleOptions(options, timeData)                            # 数据缩放(默认False)
-            applyCalibrationOptions(options, cal, timeData, reader)         # 仪器标定(默认False)
-            applyFilterOptions(options, timeData)                           # 滤波处理(默认{})
-            applyNotchOptions(options, timeData)                            # 陷波去噪(默认[])
-            applyNormaliseOptions(options, timeData)                        # 数据归一化(默认False)
-            timeDataAll[site][meas] = timeData                              # 将处理后的数据存储到字典中
+            # apply various options
+            applyPolarisationReversalOptions(options, timeData)             
+            applyScaleOptions(options, timeData)                            
+            applyCalibrationOptions(options, cal, timeData, reader)         
+            applyFilterOptions(options, timeData)                           
+            applyNotchOptions(options, timeData)                            
+            applyNormaliseOptions(options, timeData)                        
+            timeDataAll[site][meas] = timeData                              
 
     # plot all the data
-    plotfonts = options["plotoptions"]["plotfonts"]                         # 获取绘图字体设置
-    fig = plt.figure(figsize=options["plotoptions"]["figsize"])             # 创建图形对象，使用配置的图形尺寸
-    for site in timeDataAll:                                                # 遍历所有收集到的数据的站点并进行可视化
-        for meas in timeDataAll[site]:                                      # 遍历该测站的每个测量
-            timeData = timeDataAll[site][meas]                              # 获取时间数据对象
-            timeData.view(                                                  # 调用时间数据对象的view方法进行绘图
-                sampleStop=timeDataAll[site][meas].numSamples - 1,          # 绘制所有样本
-                fig=fig,                                                    # 在同一个图形上绘制
-                chans=options["chans"],                                     # 指定要绘制的通道
-                label="{} - {}".format(site, meas),                   # 图例标签：测站-测量
-                xlim=[start, stop],                                         # X轴时间范围
-                plotfonts=plotfonts,                                        # 字体设置
+    plotfonts = options["plotoptions"]["plotfonts"]                         
+    fig = plt.figure(figsize=options["plotoptions"]["figsize"])             
+    for site in timeDataAll:                                                
+        for meas in timeDataAll[site]:                                      
+            timeData = timeDataAll[site][meas]                              
+            timeData.view(                                                  
+                sampleStop=timeDataAll[site][meas].numSamples - 1,          
+                fig=fig,                                                    
+                chans=options["chans"],                                     
+                label="{} - {}".format(site, meas),                   
+                xlim=[start, stop],                                         
+                plotfonts=plotfonts,                                        
             )
 
-    # add the suptitle(添加图形总标题)
+    # add the suptitle
     st = fig.suptitle(
         "Time data from {} to {}".format(
-            start.strftime("%Y-%m-%d %H-%M-%S"), stop.strftime("%Y-%m-%d %H-%M-%S")     # 格式化的开始时间,格式化的结束时间
+            start.strftime("%Y-%m-%d %H-%M-%S"), stop.strftime("%Y-%m-%d %H-%M-%S")     
         ),
-        fontsize=plotfonts["suptitle"],                 # 使用标题字体大小
+        fontsize=plotfonts["suptitle"],                 
     )
-    st.set_y(0.98)                                      # 调整标题垂直位置（避免与子图重叠）
+    st.set_y(0.98)                                      
 
-    # do the axis labels（设置Y轴标签和范围）
-    numChans = len(options["chans"])                             # 通道数量
-    # enumerate：同时获取通道名和索引（从0开始）                       # 第一次循环：idx=0, chan="Ex"  第二次循环：idx=1, chan="Ey"
-    for idx, chan in enumerate(options["chans"]):                # 遍历每个通道，设置对应的Y轴属性。功能：逐个处理每个通道的绘图设置
-        plt.subplot(numChans, 1, idx + 1)                  # 选择当前通道的子图。创建垂直排列的子图(numChans：总行数（子图数量）,1：列数,idx + 1：当前子图位置（Matplotlib索引从1开始）)
-        # do the yaxis(设置Y轴标签和范围)
-        if isElectric(chan):                                                # 判断是否为电场通道
-            plt.ylabel("mV/km", fontsize=plotfonts["axisLabel"])   # 电场单位。设置电场通道Y轴标签,设置Y轴标签为 "mV/km",使用 plotfonts["axisLabel"]指定的字体大小
-            if len(options["plotoptions"]["Eylim"]) > 0:         # 如果设置了Y轴范围(这里没有)
-                plt.ylim(options["plotoptions"]["Eylim"])        # 强制应用电场Y轴范围(保多幅图的Y轴范围一致，便于比较)
-        else:                                                               # 磁场通道
-            if options["calibrate"]:                                        # 如果进行了标定
-                plt.ylabel("nT", fontsize=plotfonts["axisLabel"])     # 标定后单位
+    # do the axis labels
+    numChans = len(options["chans"])                             
+                           
+    for idx, chan in enumerate(options["chans"]):                
+        plt.subplot(numChans, 1, idx + 1)                  
+        # do the yaxis
+        if isElectric(chan):                                                
+            plt.ylabel("mV/km", fontsize=plotfonts["axisLabel"])   
+            if len(options["plotoptions"]["Eylim"]) > 0:         
+                plt.ylim(options["plotoptions"]["Eylim"])        
+        else:                                                               
+            if options["calibrate"]:                                        
+                plt.ylabel("nT", fontsize=plotfonts["axisLabel"])     
             else:
-                plt.ylabel("mV", fontsize=plotfonts["axisLabel"])     # 原始电压单位
-            if len(options["plotoptions"]["Hylim"]) > 0:                    # 如果设置了Y轴范围
-                plt.ylim(options["plotoptions"]["Hylim"])                   # 应用磁场Y轴范围
-        plt.legend(loc=1, fontsize=plotfonts["legend"])                     # 添加图例（右上角位置）
+                plt.ylabel("mV", fontsize=plotfonts["axisLabel"])     
+            if len(options["plotoptions"]["Hylim"]) > 0:                    
+                plt.ylim(options["plotoptions"]["Hylim"])                   
+        plt.legend(loc=1, fontsize=plotfonts["legend"])                     
 
-    # plot format（自动调整图形布局）
-    fig.tight_layout(rect=[0, 0.02, 1, 0.96])                           # 为标题预留空间
-    fig.subplots_adjust(top=0.92)                                       # 进一步调整顶部间距
+    # plot format
+    fig.tight_layout(rect=[0, 0.02, 1, 0.96])                           
+    fig.subplots_adjust(top=0.92)                                       
 
     # plot show and save
-    if options["save"]:                                                 # 图形保存逻辑(如果需要保存)
-        impath = projData.imagePath                                     # 获取图像保存路径
-        filename = "timeData_{}_{}".format(                             # 生成文件名
-            start.strftime("%Y-%m-%d_%H-%M-%S_"), stop.strftime("%Y-%m-%d_%H-%M-%S")    # 开始时间,结束时间
+    if options["save"]:                                                 
+        impath = projData.imagePath                                     
+        filename = "timeData_{}_{}".format(                             
+            start.strftime("%Y-%m-%d_%H-%M-%S_"), stop.strftime("%Y-%m-%d_%H-%M-%S")    
         )
-        savename = savePlot(impath, filename, fig)                      # 保存图形
-        projectText("Image saved to file {}".format(savename))          # 输出保存信息
-    if options["show"]:                                                 # 图形显示逻辑(如果需要显示)
-        plt.show(block=options["plotoptions"]["block"])                 # 显示图形（可阻塞或不阻塞）
-    if not options["show"] and options["save"]:                         # 如果不显示只保存，关闭图形并返回None
-        plt.close(fig)                                                  # 关闭图形释放内存
-        return None                                                     # 返回None
-    return fig                                                          # 正常情况返回图形对象
+        savename = savePlot(impath, filename, fig)                      
+        projectText("Image saved to file {}".format(savename))          
+    if options["show"]:                                                 
+        plt.show(block=options["plotoptions"]["block"])                 
+    if not options["show"] and options["save"]:                         
+        plt.close(fig)                                                  
+        return None                                                     
+    return fig                                                          
