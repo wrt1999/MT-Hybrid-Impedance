@@ -21,7 +21,7 @@ class Decimator(ResisticsBase):
     """Decimate time data
 
     Decimates time data by factors until the minimum number of required samples is reached. When a downsample factor is too large, downsampling is performed in multiple steps to maintain accuracy of result.
-    对时间数据按指定倍数进行降采样，直至达到所需的最小样本数。当降采样倍数过大时，将分多步进行降采样以保持结果的准确性
+    
     Attributes
     ----------
     timeData : TimeData
@@ -55,7 +55,7 @@ class Decimator(ResisticsBase):
 
     def __init__(self, timeData: TimeData, decParams: DecimationParameters) -> None:
         """Initialise with timeData and decimation parameters
-        使用时间数据和降采样参数进行初始化
+        
         Parameters
         ----------
         timeData : TimeData
@@ -63,19 +63,19 @@ class Decimator(ResisticsBase):
         decParams : DecimationParams
             Decimation parameters for performing the decimation
         """
-        self.timeData: TimeData = timeData                          # timeData数据
-        self.sampleFreq: float = timeData.sampleFreq * 1.0          # 采样率
-        self.chans: List = timeData.chans                           # 通道
-        self.numSamples: int = timeData.numSamples                  # 采样点数
-        self.decParams: DecimationParameters = decParams            # 降采样参数
-        config = loadConfig()                                       # 加载默认配置文件
-        self.minSamples: int = config["Decimation"]["minsamples"]   # 最小样本点
-        self.level: int = -1                                        # 初始化降采样层数
-        self.maxDownsampleFactor: int = 8                           # 单步最大降采样因子
+        self.timeData: TimeData = timeData                          
+        self.sampleFreq: float = timeData.sampleFreq * 1.0          
+        self.chans: List = timeData.chans                           
+        self.numSamples: int = timeData.numSamples                  
+        self.decParams: DecimationParameters = decParams            
+        config = loadConfig()                                       
+        self.minSamples: int = config["Decimation"]["minsamples"]   
+        self.level: int = -1                                        
+        self.maxDownsampleFactor: int = 8                           
 
     def incrementLevel(self) -> bool:
         """Downsample to the next decimation level
-        降采样至下一个抽取级别
+        
         Returns
         -------
         out : bool
@@ -84,19 +84,19 @@ class Decimator(ResisticsBase):
         Notes
         -----
         When the downsampling factor is too large, downsampling is performed in multiple steps. Downsampling will become increasingly inaccurate using the scipy routine when factor is too large        
-        当降采样因子过大时，会分多步进行降采样，如16 → [8, 2]。当因子过大时，使用 scipy 路线进行降采样会变得越来越不准确。
+        
         """
-        # increment level, 0 is the first level(递增层级，其中0表示首个层级)
-        self.level = self.level + 1           # 级别递增（0-based），初始为-1，0表示第1级
-        downsampleFactor = self.decParams.getIncrementalFactor(self.level)         # 获取从上一级到当前级的增量降采样因子
+        # increment level, 0 is the first level
+        self.level = self.level + 1           
+        downsampleFactor = self.decParams.getIncrementalFactor(self.level)         
 
-        # if downsample factor is greater than maxDownsampleFactor, downsample in multiple steps(如果降采样因子大于最大降采样因子，则分多步进行降采样,如16 → [8, 2])
+        # if downsample factor is greater than maxDownsampleFactor, downsample in multiple steps
         numDownsamples = 1
         downsampleList = [downsampleFactor]
         if downsampleFactor > self.maxDownsampleFactor:
-            # this should give an integer(此操作应输出整数结果)
-            numDownsamples = intdiv(downsampleFactor, self.maxDownsampleFactor)            # 返回整商2，例如：目标因子16 → 拆分为 [8, 2],intdiv 确保分解后的因子为整数
-            downsampleList = [self.maxDownsampleFactor, numDownsamples]                     # [8, 2]
+            # this should give an integer
+            numDownsamples = intdiv(downsampleFactor, self.maxDownsampleFactor)            
+            downsampleList = [self.maxDownsampleFactor, numDownsamples]                     
             # print info
             self.printText(
                 "Downsample factor of {:d} greater than max decimation factor {:d}.".format(
@@ -108,28 +108,28 @@ class Decimator(ResisticsBase):
                     arrayToStringInt(downsampleList)
                 )
             )
-        # 分步降采样执行，若目标因子超过设定的最大降采样因子8
+        
         if numDownsamples <= 2:
             for iDS in range(0, numDownsamples):
-                check = self.downsample(downsampleList[iDS])        # (这一步里进行数据降采样)判断是否可以继续对timeData进行降采样,一般返回True。当降采样导致样本数量低于 minSamples 时，将不会执行降采样。在这种情况下，该函数返回 False。
-                if not check:  # check outcome of decimation(检验降采样的成效)
+                check = self.downsample(downsampleList[iDS])       
+                if not check:  # check outcome of decimation
                     return False
-                # otherwise, everything ok, update class vars and return True(否则，一切正常，更新类变量并返回 True)
-                self.sampleFreq = self.timeData.sampleFreq           # 降采样后频率
-                self.numSamples = self.timeData.numSamples           # 降采样后样本数
+                # otherwise, everything ok, update class vars and return True
+                self.sampleFreq = self.timeData.sampleFreq           
+                self.numSamples = self.timeData.numSamples           
         else:
             for iDS in range(0, 2):
-                check = self.downsample(downsampleList[iDS])        # (这一步里进行数据降采样)判断是否可以继续对timeData进行降采样,一般返回True。当降采样导致样本数量低于 minSamples 时，将不会执行降采样。在这种情况下，该函数返回 False。
-                if not check:  # check outcome of decimation(检验降采样的成效)
+                check = self.downsample(downsampleList[iDS])        
+                if not check:  # check outcome of decimation
                     return False
-                # otherwise, everything ok, update class vars and return True(否则，一切正常，更新类变量并返回 True)
-                self.sampleFreq = self.timeData.sampleFreq           # 降采样后频率
-                self.numSamples = self.timeData.numSamples           # 降采样后样本数
+                # otherwise, everything ok, update class vars and return True
+                self.sampleFreq = self.timeData.sampleFreq           
+                self.numSamples = self.timeData.numSamples           
         return True
 
     def downsample(self, downsampleFactor: int) -> bool:
         """Downsample time data
-        对timeData进行降采样
+        
         Parameters
         ----------
         downsampleFactor : int
@@ -143,20 +143,20 @@ class Decimator(ResisticsBase):
         Notes
         -----
         When the downsampling causes number of simples to fall below minSamples, downsampling is not performed. The function returns False in this situation
-        当降采样导致样本数量低于 minSamples 时，将不会执行降采样。在这种情况下，该函数返回 False 。
+        
         """
-        # check to see not at max level(检查一下，确保未达到最大级别)
+        # check to see not at max level
         if self.level >= self.decParams.numLevels:
             self.printWarning(
                 "Error, number of decimation levels exceeded, returning no data"
             )
             return False
-        # if downsample factor is 1, nothing to do(若降采样因子为1，则无需进行任何操作)
+        # if downsample factor is 1, nothing to do
         if downsampleFactor == 1:
             return True
 
-        # downsampling reduces the number of samples by downsample factor   降采样，通过降采样因子降低样本数量
-        # if new number of samples is too small, return False       若新样本数量过小，则返回False
+        # downsampling reduces the number of samples by downsample factor   
+        # if new number of samples is too small, return False                
         if self.numSamples / downsampleFactor < self.minSamples:
             self.printWarning(
                 "Next decimation level has less than {} samples. Decimation is exiting.\nSet minimum of samples required using decimator.setMinSamples().".format(
@@ -165,12 +165,12 @@ class Decimator(ResisticsBase):
             )
             return False
 
-        # do the resampling（执行重采样操作）
-        self.timeData.data = downsampleData(self.timeData.data, downsampleFactor)           # (这一步里进行数据降采样),将timeData里每个通道的时域数据进行降采样。
-        # update the rest of the timeData object(更新 timeData 对象的其余字段)
-        self.timeData.sampleFreq = self.timeData.sampleFreq / downsampleFactor              # 降采样后的新采样率15/8=1.875
-        self.timeData.numSamples = self.timeData.data[self.chans[0]].size                   # 降采样后timeData每个通道的时域数据个数
-        # start time stays the same, but end time needs to change(第一个样本数据开始时间保持不变，但最后一个样本数据结束时间需要更改)
+        # do the resampling
+        self.timeData.data = downsampleData(self.timeData.data, downsampleFactor)           
+        # update the rest of the timeData object
+        self.timeData.sampleFreq = self.timeData.sampleFreq / downsampleFactor              
+        self.timeData.numSamples = self.timeData.data[self.chans[0]].size                   
+        # start time stays the same, but end time needs to change
         self.timeData.stopTime = self.timeData.startTime + timedelta(
             seconds=(1.0 / self.timeData.sampleFreq) * (self.timeData.numSamples - 1)
         )
