@@ -196,83 +196,83 @@ class TimeData(ResisticsBase):
         plt.figure
             Matplotlib figure object
         """
-        # the number of samples to plot(设置默认的样本范围（从第0个样本到最后一个样本）)
+        # the number of samples to plot
         sampleStart = 0
         sampleStop = 432000
-        if "sampleStart" in kwargs:                     # 使用用户传入的参数覆盖默认值
-            sampleStart = kwargs["sampleStart"]         # 用户指定的开始样本
+        if "sampleStart" in kwargs:                     
+            sampleStart = kwargs["sampleStart"]         
         if "sampleStop" in kwargs:
-            sampleStop = kwargs["sampleStop"]           # 用户指定的结束样本
-        if sampleStop >= self.numSamples:               # 边界检查：确保结束样本不超过数据总长度
-            sampleStop = self.numSamples - 1            # 调整为最后一个有效样本
-        # get the x axis ready(获取完整的时间戳数组（所有样本对应的时间）)
-        x = self.getDateArray()                         # 返回datetime对象数组
-        start = x[sampleStart]                          # 开始样本对应的时间
-        stop = x[sampleStop]                            # 结束样本对应的时间
+            sampleStop = kwargs["sampleStop"]           
+        if sampleStop >= self.numSamples:               
+            sampleStop = self.numSamples - 1            
+        # get the x axis ready
+        x = self.getDateArray()                         
+        start = x[sampleStart]                          
+        stop = x[sampleStop]                            
 
-        # now plot(创建或复用图形对象)
+        # now plot
         fig = (
-            plt.figure(kwargs["fig"].number)                    # 复用现有图形
+            plt.figure(kwargs["fig"].number)                    
             if "fig" in kwargs
-            else plt.figure(figsize=(20, 2 * self.numChans))    # 创建新图形
+            else plt.figure(figsize=(20, 2 * self.numChans))    
         )
-        plotfonts = kwargs["plotfonts"] if "plotfonts" in kwargs else getViewFonts()        # 获取字体设置（用户指定或默认值）
-        # suptitle(设置图形总标题)
+        plotfonts = kwargs["plotfonts"] if "plotfonts" in kwargs else getViewFonts()        
+        # suptitle
         st = fig.suptitle(
             "Time data from {} to {}, samples {} to {}".format(
                 start, stop, sampleStart, sampleStop
             ),
-            fontsize=plotfonts["suptitle"],         # 使用标题字体大小
+            fontsize=plotfonts["suptitle"],         
         )
-        st.set_y(0.98)                  # 调整标题垂直位置（避免与子图重叠）
+        st.set_y(0.98)                  
         # now plot the data
-        dataChans = kwargs["chans"] if "chans" in kwargs else self.chans        # 确定要绘制的通道列表(用户指定或默认所有通道)
-        numDataChans = len(dataChans)                                           # 实际要绘制的通道数量
-        for idx, chan in enumerate(dataChans):                                  # 遍历每个通道，创建子图
-            ax = plt.subplot(numDataChans, 1, idx + 1)                    # 创建子图：行数=通道数，列数=1，当前位置=idx+1
-            plt.title("Channel {}".format(chan), fontsize=plotfonts["title"])   # 设置子图标题（通道名称）
+        dataChans = kwargs["chans"] if "chans" in kwargs else self.chans        
+        numDataChans = len(dataChans)                                           
+        for idx, chan in enumerate(dataChans):                                  
+            ax = plt.subplot(numDataChans, 1, idx + 1)                    
+            plt.title("Channel {}".format(chan), fontsize=plotfonts["title"])   
 
-            # check if channel exists in data and if not, leave empty plot so it's clear(检查通道数据是否存在（处理数据缺失情况）)
+            # check if channel exists in data and if not, leave empty plot so it's clear
             if chan not in self.data:
                 continue
 
-            # label for plot(生成图例标签（用户指定或自动生成）)
+            # label for plot
             lab = (
-                kwargs["label"]                                         # 用户自定义标签
+                kwargs["label"]                                         
                 if "label" in kwargs
-                else "{}: {} to {}".format(chan, start, stop)     # 自动生成标签
+                else "{}: {} to {}".format(chan, start, stop)     
             )
-            # plot data(绘制时间序列数据（核心绘图操作）)
+            # plot data
             plt.plot(
-                x[sampleStart : sampleStop + 1],                  # X轴数据：时间序列
-                self.data[chan][sampleStart : sampleStop + 1],          # Y轴数据：通道数值
-                label=lab,                                              # 图例标签
+                x[sampleStart : sampleStop + 1],                  
+                self.data[chan][sampleStart : sampleStop + 1],          
+                label=lab,                                              
             )
-            # add time label（只在最下面的子图显示X轴标签（避免重复））
-            if idx == numDataChans - 1:                                             # 最后一个通道（最下方）
+            # add time label
+            if idx == numDataChans - 1:                                             
                 plt.xlabel("Time", fontsize=plotfonts["axisLabel"])
             # set the xlim
-            xlim = kwargs["xlim"] if "xlim" in kwargs else [start, stop]            # 设置X轴范围（用户指定或使用数据时间范围）
+            xlim = kwargs["xlim"] if "xlim" in kwargs else [start, stop]            
             plt.xlim(xlim)
-            # y axis options                                                        # 设置Y轴标签（根据通道类型）
+            # y axis options                                                        
             if isElectric(chan):
-                plt.ylabel("mV/km", fontsize=plotfonts["axisLabel"])            # 电场通道
+                plt.ylabel("mV/km", fontsize=plotfonts["axisLabel"])            
             else:
-                plt.ylabel("nT or mV", fontsize=plotfonts["axisLabel"])         # 磁场通道
-            plt.grid(True)                                                            # 添加网格线便于读数
-            # set tick sizes(设置刻度标签字体大小)
+                plt.ylabel("nT or mV", fontsize=plotfonts["axisLabel"])         
+            plt.grid(True)                                                            
+            # set tick sizes
             for label in ax.get_xticklabels() + ax.get_yticklabels():
                 label.set_fontsize(plotfonts["axisTicks"])
             # legend
-            if "legend" in kwargs and kwargs["legend"]:                             # 根据参数决定是否显示图例(这里没有)
-                plt.legend(loc=4)                                                   # loc=4表示右下角
+            if "legend" in kwargs and kwargs["legend"]:                             
+                plt.legend(loc=4)                                                   
 
-        # show if the figure is not in keywords(如果是在新创建的图形上绘图，进行布局优化并显示)
-        if "fig" not in kwargs:                                     # 新图形（非复用）
-            plt.tight_layout(rect=[0, 0.02, 1, 0.96])               # 自动调整布局，为标题留空间
-            plt.show()                                              # 显示图形
+        # show if the figure is not in keywords
+        if "fig" not in kwargs:                                     
+            plt.tight_layout(rect=[0, 0.02, 1, 0.96])               
+            plt.show()                                              
 
-        return fig                                                  # 返回图形对象（便于进一步处理或保存）
+        return fig                                                  
 
     def printList(self) -> List[str]:
         """Class information as a list of strings
