@@ -1,0 +1,8 @@
+Calibration data path = D:\resistics\tutorial\tutorialProject\calData
+Time data path = D:\resistics\tutorial\tutorialProject\timeData
+Spectra data path = D:\resistics\tutorial\tutorialProject\specData
+Statistics data path = D:\resistics\tutorial\tutorialProject\statData
+Mask data path = D:\resistics\tutorial\tutorialProject\maskData
+TransFunc data path = D:\resistics\tutorial\tutorialProject\transFuncData
+Image data path = D:\resistics\tutorial\tutorialProject\images
+Reference time = 2022-01-01 00:00:00
