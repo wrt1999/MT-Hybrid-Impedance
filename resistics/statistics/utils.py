@@ -7,7 +7,7 @@ from resistics.common.print import errorPrint
 
 def getStatNames() -> Tuple[List[str], List[str]]:
     """Get a list of statistic and remotestatistic names
-    获取统计量与远程统计量的名称列表
+    
     Returns
     -------
     stats : List[str]
