@@ -58,7 +58,7 @@ class CalibrationData(ResisticsBase):
         sensor: str = "",
     ) -> None:
         """Initialise and set object parameters
-        初始化并设置对象参数
+        
         Parameters
         ----------
         filename : str
@@ -200,7 +200,7 @@ class CalibrationData(ResisticsBase):
         )
         for ii in range(0, self.numSamples):
             textLst.append(
-                "\t{:17.10f}\t{:17.10f}\t{:17.10f}".format(                    # \t（制表符）用于对齐列，{:17.10f}总宽度为17字符（含小数点及符号，未到17则补齐），小数点后保留10位，浮点数
+                "\t{:17.10f}\t{:17.10f}\t{:17.10f}".format(                    
                     self.freqs[ii], self.magnitude[ii], self.phase[ii]
                 )
             )
