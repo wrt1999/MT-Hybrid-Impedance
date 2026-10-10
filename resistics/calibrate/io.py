@@ -62,13 +62,13 @@ class CalibrationIO(ResisticsBase):
     printList()
         Class status returned as list of strings       
 	"""
-    # 初始化校准数据读取器
+    
     def __init__(
         self,
-        datafile: str = "",                   # 校准文件路径（字符串），默认空字符串
-        fileformat: str = "induction",        # 文件格式（字符串），默认"induction"（感应式传感器标准格式）
-        chopper: bool = False,                # 斩波器模式标志（布尔值），默认False（关闭）
-        extend: bool = False,                  # 频率范围扩展标志（布尔值），默认True（启用）
+        datafile: str = "",                   
+        fileformat: str = "induction",        
+        chopper: bool = False,                
+        extend: bool = False,                  
     ) -> None:
         """Initialise CalibrationIO
 
@@ -126,7 +126,7 @@ class CalibrationIO(ResisticsBase):
     #############################################
     def read(self) -> CalibrationData:
         """Read data from calibration file and return CalibrationData object
-        从校准文件中读取数据，并返回CalibrationData对象
+        
         Notes
         -----
         Data for magnetic channel calibration is returned with units: F [Hz], Magnitude [mV/nT], Phase [radians]
@@ -149,13 +149,13 @@ class CalibrationIO(ResisticsBase):
 
     def readInductionData(self):
         """Read data from a text based calibration file for induction coils
-        从感应线圈的文本格式校准文件中读取数据
+        
         Text based calibration files should be used when reading of other formats appears to be failing or are not supported. 
-        若其他格式的校准文件读取失败或不受支持，应采用文本格式校准文件
+        
         Notes
         -----
-        Data in file is assumed to be in units: F [Hz], Magnitude [mV/nT], Phase [degrees or radians]   文件中的数据假定单位为：F [赫兹]，幅度 [毫伏/纳特]，相位 [度或弧度]
-        Data is returned with units: F [Hz], Magnitude [mV/nT], Phase [radians] 返回的数据单位为：F [赫兹]，幅度 [毫伏/纳特]，相位 [弧度]
+        Data in file is assumed to be in units: F [Hz], Magnitude [mV/nT], Phase [degrees or radians]   
+        Data is returned with units: F [Hz], Magnitude [mV/nT], Phase [radians] 
 
         Returns
         -------
@@ -375,11 +375,11 @@ class CalibrationIO(ResisticsBase):
 
     def readInternalFormat(self):
         """Read data from a text based calibration file for any type of instrument 
-        从基于文本格式的校准文件中读取任何类型仪器的数据
+        
         Notes
         -----
         Text based calibration files should be used when reading of other formats appears to be failing or are not supported. Nothing is assumed or promised about the data units.
-        当读取其他格式的文件似乎失败或不受支持时，应使用基于文本的校准文件。对于数据单位，不做任何假设或承诺
+        
         Returns
         -------
         CalibrationData
@@ -405,44 +405,44 @@ class CalibrationIO(ResisticsBase):
                     chopper = True
                 else:
                     chopper = False
-            # 修改后加了and serial != 4104
-            if "CALIBRATION DATA" in line and serial != 4884:                   # 遇到"CALIBRATION DATA"标记时停止解析头部
+            
+            if "CALIBRATION DATA" in line and serial != 4884:                   
                 dataReadFrom = il + 1
-                dataLines = lines[dataReadFrom:]  # 读取每行数据(可切片lines[start:stop:step])
+                dataLines = lines[dataReadFrom:]  
                 break
             ##########################################################
             if "CALIBRATION DATA" in line and serial == 4884:
                 dataReadFrom = il + 1
                 dataReadFrom = dataReadFrom + self.indexchan
                 dataLines = lines[dataReadFrom::5]
-                # 递增计数器，为下一次调用准备
+                
                 self.indexchan += 1
                 break
             ##########################################################
 
-        data = self.linesToArray(dataLines)     # 将文本行列表（dataLines）转换为结构化数组
+        data = self.linesToArray(dataLines)     
         # sort and extend
-        data = self.sortCalData(data)         # 按频率升序排列数据
-        if self.extend:                        # 默认extend为True
-            data = self.extendCalData(data)     # 在校准数据的开头和结尾添加额外的数据点，防止越界
-        # apply static gain(应用静态增益, 将幅度数据乘以静态增益系数, 校正传感器硬件放大倍数)
-        data[:, 1] = data[:, 1] * staticGain      # data[:, 1], ：表示选择所有行(即所有数据点), 1：表示选择第2列
+        data = self.sortCalData(data)         
+        if self.extend:                        
+            data = self.extendCalData(data)     
+        # apply static gain
+        data[:, 1] = data[:, 1] * staticGain      
         if phaseUnit == "degrees":
-            data[:, 2] = data[:, 2] * (math.pi / 180)          # math.pi = 3.1415926    将degrees换算成radious  弧度 = 度 * (pi / 180)
+            data[:, 2] = data[:, 2] * (math.pi / 180)          
 
-        calData = CalibrationData(           # 创建校准数据对象
-            self.datafile,                   # 文件路径
-            data[:, 0],                      # 频率数组
-            data[:, 1],                      # 幅度数组（已乘增益）
-            data[:, 2],                      # 相位数组（已转弧度）
-            staticGain,                      # 静态增益值
-            chopper=chopper,                 # 斩波器状态
-            serial=serial,                   # 传感器序列号
-            sensor=sensor,                   # 传感器型号
+        calData = CalibrationData(           
+            self.datafile,                   
+            data[:, 0],                      
+            data[:, 1],                      
+            data[:, 2],                      
+            staticGain,                      
+            chopper=chopper,                 
+            serial=serial,                   
+            sensor=sensor,                   
         )
-        # 设置单位属性
-        calData.magnitudeUnit = magnitudeUnit     # 如 "mV/nT"
-        calData.phaseUnit = "radians"             # 强制相位单位为弧度
+        
+        calData.magnitudeUnit = magnitudeUnit     
+        calData.phaseUnit = "radians"             
         return calData
 
     def unitCalibration(self) -> CalibrationData:
@@ -476,13 +476,13 @@ class CalibrationIO(ResisticsBase):
 
     def extendCalData(self, data: np.ndarray) -> np.ndarray:
         """Extend calibration data by frequency
-        用于扩展校准数据的频率范围，通过在低频和高频端添加额外的数据点，确保校准数据完全覆盖实际信号的频率范围。
+        
         Add extra points at the start and end of the calibration data to ensure complete coverage with the time data. 
-        在校准数据的开头和结尾添加额外的数据点，以确保与时间数据完全覆盖
+        
         Notes
         -----
         It is assumed that the calibration data is already sorted in ascending order (using sortCalData)
-        假定校准数据已按升序排列（使用 sortCalData 进行排序）
+        
         Parameters
         ----------
         data : np.ndarray
@@ -493,16 +493,16 @@ class CalibrationIO(ResisticsBase):
         data : np.ndarray
             Extended calibration data
         """
-        if data[0, 0] > 0.0000001:  # 满足条件
-            # add a line at the top (low frequency) extending the calibration information（在顶部（低频区域）添加一行数据，以拓展校准信息。）
+        if data[0, 0] > 0.0000001:  
+            # add a line at the top (low frequency) extending the calibration information
             data = np.vstack((np.array([0.0000001, data[0, 1], data[0, 2]]), data))
-        if data[-1, 0] < 100000000: # 满足条件
+        if data[-1, 0] < 100000000: 
             # add a line at the top (high frequency) extending the calibration information
             data = np.vstack((data, np.array([100000000, data[-1, 1], data[-1, 2]])))
         return data
 
     def linesToArray(self, dataLines: List) -> np.ndarray:
-        """Convert data lines from a file to an array将文件中的数据行转换为数组
+        """Convert data lines from a file to an array
 
         Parameters
         ----------
@@ -514,9 +514,9 @@ class CalibrationIO(ResisticsBase):
         data : np.ndarray
             Data lines converted to a float array
         """
-        # data to columns(数据转为列)
-        numData = len(dataLines)        # 如Hx的为80
-        for il in range(0, numData):    # 不包含最后一个，只有0~79
+        # data to columns
+        numData = len(dataLines)        
+        for il in range(0, numData):    
             dataLines[il] = dataLines[il].split()
         return np.array(dataLines, dtype=float)
 
