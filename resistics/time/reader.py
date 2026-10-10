@@ -695,35 +695,35 @@ class TimeReader(ResisticsBase):
 
     def getPhysicalSamples(self, **kwargs):
         r"""Get data scaled to physical values
-        获取按物理量纲缩放的数据
+        
         Depending on the data format, the scalings required to convert to field physical units is different. The method in the base DataReader class covers ATS and internal file format.
-        根据数据格式的不同，转换为场物理单位所需的缩放方式也不同，基类 DataReader 中的方法涵盖了 ATS 和内部文件格式
+        
         resistics will always provide physical samples in field units. That means
-        Resistics 始终以场物理单位输出物理量样本
+        
         - Electrical channels in mV/km
         - Magnetic channels in mV
         - To get magnetic fields in nT, calibration needs to be performed
-        若需获取纳特（nT）单位的磁场数据，需执行校准操作
+        
         If the channel header scaling_applied is set to True, no scaling of the unscaled data is done. This is to cover the internal data format where all scalings may already have been applied.
-        若通道头文件中“scaling_applied”字段设为True，则不对未缩放数据执行缩放操作。此设计旨在适配内部数据格式——该格式下所有缩放处理可能已预先完成。
+        
         Notes
         -----
         The raw data units for ATS data are in counts. To get data in field units, ATS data is first multipled by the least significat bit (lsb) defined in the header files,
-        ATS数据的原始单位为计数（counts）。若需转换为场物理单位，需先将ATS数据与头文件中定义的最小有效位（lsb）相乘
+        
         .. math::  
         
             data = data * lsb,
         
         giving data in mV. The lsb includes the gain removal, so no separate gain removal needs to be performed.
-        转换后数据单位为毫伏（mV）。最小有效位（lsb）已集成增益去除操作，因此无需额外执行独立的增益去除步骤
+        
         For electrical channels, there is additional step of dividing by the electrode spacing, which is provided in metres. The extra factor of a 1000 is to convert this to km to give mV/km for electric channels
-        对于电通道，还需要额外一步，即除以电极间距（以米为单位）。乘以 1000 的额外因子是为了将其转换为千米，从而得到电通道的 mV/km 值
+        
         .. math::   
             
             data = \frac{1000 * data}{electrodeSpacing}
         
         Finally, to get magnetic channels in nT, the magnetic channels need to be calibrated.
-        最后，若需获取单位为纳特（nT）的磁通道数据，需对磁通道执行校准操作
+        
         Parameters
         ----------
         chans : List[str]
@@ -806,9 +806,9 @@ class TimeReader(ResisticsBase):
 
     def getPhysicalData(self, startTime, endTime, **kwargs):
         """Get physical data from data file between a start and end data
-        从数据文件中提取起始数据与结束数据之间的物理数据
+        
         Calculates the start and end sample given the data range and returns getPhysicalSamples for that sample range.
-        根据数据范围计算起始和结束样本，并返回该样本范围的 getPhysicalSamples
+        
         Parameters
         ----------
         startTime : datetime
