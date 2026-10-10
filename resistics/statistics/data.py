@@ -142,7 +142,7 @@ class StatisticData(ResisticsBase):
         winOlap : int
             The window overlap in samples
         kwargs : Dict
-            Two optional arguments: "name" for statistic name and "stats" for the statistics to use 可选关键字参数，包括"name"（统计量名称）和"stats"（使用的统计量）
+            Two optional arguments: "name" for statistic name and "stats" for the statistics to use 
         """
         self.statName: str = statName                                                           
         self.refTime = refTime                                                                  
@@ -154,20 +154,20 @@ class StatisticData(ResisticsBase):
         # defaults from keywords
         self.numWindows: int = 0                                                                
         self.winStats: List[str] = []                                                           
-        self.numStatsPerWindow: int = 0                                                         # 每个窗口的统计量数量，初始为0
-        self.evalFreq: Union[List, np.ndarray] = []                                             # 评估频率列表，实际进行统计计算的频率点
-        self.freq2index: Dict = {}                                                              # 频率到索引的映射字典，用于快速查找频率对应的数组索引
-        self.globalIndices: Union[List, np.ndarray] = []                                        # 全局索引数组，每个窗口对应的全局时间索引
-        self.global2localMap: Dict = {}                                                         # 全局索引到局部索引的映射字典
-        self.comments: List[str] = []                                                           # 注释列表，记录数据处理的历史和参数
-        self.dtype: str = "float"                                                               # 数据类型，默认"float"，但也可以是"complex"用于复数统计量
+        self.numStatsPerWindow: int = 0                                                         
+        self.evalFreq: Union[List, np.ndarray] = []                                             
+        self.freq2index: Dict = {}                                                              
+        self.globalIndices: Union[List, np.ndarray] = []                                        
+        self.global2localMap: Dict = {}                                                         
+        self.comments: List[str] = []                                                           
+        self.dtype: str = "float"                                                               
         # global dates
-        self.globalDatesStarts: Union[List, np.ndarray] = []                                    # 时间窗口的开始时间数组（基于参考时间的绝对时间）
-        self.globalDatesStops: Union[List, np.ndarray] = []                                     # 时间窗口的结束时间数组
-        # plot params(绘图参数)
-        self.maxcols: int = 4                                                                   # 最大列数，用于多子图排列
-        # parse keywords(解析关键字)
-        self.initialiseFromKeywords(kwargs)                                                     # 解析关键字参数，设置可选的额外属性
+        self.globalDatesStarts: Union[List, np.ndarray] = []                                    
+        self.globalDatesStops: Union[List, np.ndarray] = []                                    
+        # plot params
+        self.maxcols: int = 4                                                                   
+        # parse keywords
+        self.initialiseFromKeywords(kwargs)                                                     
 
     def initialiseFromKeywords(self, keywords):
         """Initialise object properties using the keywords"""
@@ -348,24 +348,24 @@ class StatisticData(ResisticsBase):
         dtype : str, optional
             The datatype of the statistic values
         """
-        self.numWindows = numWindows                                                        # 设置窗口数量
+        self.numWindows = numWindows                                                        
         # details about the statistics
-        self.winStats = winStats                                                            # 设置窗口统计量参数列表(统计量的详细信息)
-        self.numStatsPerWindow = len(winStats)                                              # 计算每个窗口的统计量数量
+        self.winStats = winStats                                                           
+        self.numStatsPerWindow = len(winStats)                                              
         # details about the evaluation frequencies
-        self.evalFreq = evalFreq                                                            # 设置评估频率列表(每层)
+        self.evalFreq = evalFreq                                                            
         for idx, eFreq in enumerate(evalFreq):
-            self.freq2index[eFreq] = idx                                                    # 遍历所有频率，建立频率值到数组索引的映射
+            self.freq2index[eFreq] = idx                                                   
         # data type
         if not (dtype is None):
-            self.dtype = dtype                                                              # 如果提供了dtype参数，则覆盖默认的数据类型
-        self.stats = np.empty(                                                              # 使用numpy的empty函数创建指定形状的未初始化数组(预分配统计量数据数组)
-            shape=(self.numWindows, self.evalFreq.size, self.numStatsPerWindow),            # 维度0：时间窗口数量。维度1：评估频率数量。维度2：每个窗口的统计量数量
-            dtype=self.dtype,                                                               # 数据类型
+            self.dtype = dtype                                                              
+        self.stats = np.empty(                                                             
+            shape=(self.numWindows, self.evalFreq.size, self.numStatsPerWindow),            
+            dtype=self.dtype,                                                               
         )
-        # an array to hold global indices and a dictionary to map them back to local indices(一个用于存储全局索引的数组，以及一个用于将全局索引映射回局部索引的字典)
-        self.globalIndices = np.empty(shape=(self.numWindows), dtype=int)                   # 存储全局索引的数组
-        self.global2localMap = {}                                                           # 全局索引映射回局部索引的字典
+        # an array to hold global indices and a dictionary to map them back to local indices
+        self.globalIndices = np.empty(shape=(self.numWindows), dtype=int)                  
+        self.global2localMap = {}                                                           
 
     def addStat(self, localIndex: int, globalIndex: int, stat) -> None:
         """Add statistic values for a window for all evaluation frequencies
@@ -410,15 +410,15 @@ class StatisticData(ResisticsBase):
 
     def view(self, eFreqI: int, **kwargs) -> Figure:
         """Plot statistics for evaluation frequency index
-        绘制指定评估频率索引的统计量图
+        
         Plots a simple scatter of each statistic with datetime on the xaxis (datetime of the window start dates). Number of subplots is equal to numStaStatPerWindow.
-        绘制统计量的简单散点图，x轴为时间（窗口开始时间），子图数量等于每个窗口的统计量数量
+        
         Parameters
         ----------
         eFreqI : int
-            Evaluation frequency index              评估频率索引
+            Evaluation frequency index              
         maskwindows : List, np.ndarray
-            Global windows to exclude               要排除的全局窗口
+            Global windows to exclude               
         fig : matplotlib.pyplot.figure, optional
             A figure object
         plotfonts : Dict, optional
@@ -439,18 +439,18 @@ class StatisticData(ResisticsBase):
         Returns
         -------
         plt.figure
-            Matplotlib figure object        Matplotlib图形对象
+            Matplotlib figure object        
         """
-        # get windows to plot and global dates(获取要绘制的窗口和全局日期)
-        maskWindows = kwargs["maskwindows"] if "maskwindows" in kwargs else []                  # 数据筛选：maskWindows用于排除质量差的窗口
-        plotIndices = self.getUnmaskedIndices(maskWindows)                                      # 索引计算：getUnmaskedIndices计算有效窗口的索引
-        globalDates = self.getGlobalDates()                                                     # 时间数据：getGlobalDates获取每个窗口的开始时间
-        eFreq = self.evalFreq[eFreqI]                                                           # 频率获取：eFreq是当前评估频率的实际值
+        # get windows to plot and global dates
+        maskWindows = kwargs["maskwindows"] if "maskwindows" in kwargs else []                  
+        plotIndices = self.getUnmaskedIndices(maskWindows)                                      
+        globalDates = self.getGlobalDates()                                                     
+        eFreq = self.evalFreq[eFreqI]                                                           
 
-        # plot params(绘图参数)
-        nrows, ncols = self.getRowsCols(self.maxcols)                                           # 行数和列数
-        plotfonts = kwargs["plotfonts"] if "plotfonts" in kwargs else getViewFonts()            # 绘图参数
-        # 图形创建和标题设置
+        # plot params
+        nrows, ncols = self.getRowsCols(self.maxcols)                                           
+        plotfonts = kwargs["plotfonts"] if "plotfonts" in kwargs else getViewFonts()            
+        
         fig: plt.figure = (
             plt.figure(kwargs["fig"].number)
             if "fig" in kwargs
@@ -463,41 +463,41 @@ class StatisticData(ResisticsBase):
         st.set_y(0.98)
 
         # plot the data
-        for idx, val in enumerate(self.winStats):                                       # 统计量遍历(如cohExHx)
-            ax = plt.subplot(nrows, ncols, idx + 1)                               # 为每个统计量创建单独的子图
-            plt.title("Value {}".format(val), fontsize=plotfonts["title"])              # 标题
-            label = kwargs["label"] if "label" in kwargs else eFreq                     # 图例标签
+        for idx, val in enumerate(self.winStats):                                       
+            ax = plt.subplot(nrows, ncols, idx + 1)                               
+            plt.title("Value {}".format(val), fontsize=plotfonts["title"])              
+            label = kwargs["label"] if "label" in kwargs else eFreq                     
 
-            # limit the data by plotIndices if not False(如果plotIndices不为None，则通过plotIndices限制数据)
-            plotData = np.squeeze(self.stats[:, eFreqI, idx])                           # 提取指定频率4.6875和指定统计量cohExHx的数据
-            plotDates = globalDates                                                     # 每个窗口的开始时间，与plotData保持对应关系
+            # limit the data by plotIndices if not False
+            plotData = np.squeeze(self.stats[:, eFreqI, idx])                           
+            plotDates = globalDates                                                     
             if plotIndices is not None:
-                plotData = plotData[plotIndices]                                        # 使用plotIndices过滤掉被掩码的窗口
+                plotData = plotData[plotIndices]                                       
                 plotDates = plotDates[plotIndices]
 
-            # the colourdata(颜色数据)
+            # the colourdata
             colourbool, colourdata, cmap = self.calcColourData(
                 plotData, val, eFreqI, kwargs
             )
-            # scatter plot(散点图)
+            # scatter plot
             if not colourbool:
                 scat = plt.scatter(
                     plotDates,
                     plotData,
-                    edgecolors="none",                                                  # 无边框
-                    marker="o",                                                         # 圆形标记
-                    s=12,                                                               # 点大小
-                    label=label,                                                        # 图例标签
+                    edgecolors="none",                                                  
+                    marker="o",                                                         
+                    s=12,                                                               
+                    label=label,                                                        
                 )
             else:
                 scat = plt.scatter(
                     plotDates,
                     plotData,
-                    c=colourdata,                                                       # 颜色数据
+                    c=colourdata,                                                       
                     edgecolors="none",
                     marker="o",
                     s=12,
-                    cmap=cmap,                                                          # 颜色映射
+                    cmap=cmap,                                                          
                     label=label,
                 )
                 clim = (
@@ -505,8 +505,8 @@ class StatisticData(ResisticsBase):
                     if ("clim" in kwargs and len(kwargs["clim"]) > 0)
                     else [colourdata.min(), colourdata.max()]
                 )
-                scat.set_clim(clim)                                                     # 设置颜色范围
-            # x axis options(x轴设置)
+                scat.set_clim(clim)                                                     
+            # x axis options
             plt.xlabel("Time", fontsize=plotfonts["axisLabel"])
             xlim = (
                 kwargs["xlim"]
@@ -516,38 +516,38 @@ class StatisticData(ResisticsBase):
             plt.xlim(xlim)
             ax.format_xdata = DateFormatter("%H-%M-%S")
             fig.autofmt_xdate()
-            # y axis options(y轴设置)
+            # y axis options
             if "ylim" in kwargs and len(kwargs["ylim"]) > 0:
                 plt.ylim(kwargs["ylim"])
             plt.ylabel("Value {}".format(val), fontsize=plotfonts["axisLabel"])
-            # set tick sizes(设置坐标轴刻度大小)
+            # set tick sizes
             for label in ax.get_xticklabels() + ax.get_yticklabels():
                 label.set_fontsize(plotfonts["axisTicks"])
             plt.grid(True, ls="--")
-            # legend(图例)
+            # legend
             if "legend" in kwargs and kwargs["legend"]:
-                plt.legend(loc=4)                                                       # 右下角
+                plt.legend(loc=4)                                                       
 
-        # show if the figure is not in keywords(如果图形不在关键字中，则显示)
+        # show if the figure is not in keywords
         if "fig" not in kwargs:
             if colourbool:
-                fig.tight_layout(rect=[0.02, 0.02, 0.85, 0.92])                         # 为颜色条留空间
-                cax = fig.add_axes([0.88, 0.10, 0.03, 0.80])                            # 颜色条坐标
+                fig.tight_layout(rect=[0.02, 0.02, 0.85, 0.92])                         
+                cax = fig.add_axes([0.88, 0.10, 0.03, 0.80])                            
                 colourtitle = (
                     kwargs["colortitle"] if "colortitle" in kwargs else "Value"
                 )
                 self.addColourbar(scat, cax, colourtitle, plotfonts)
             else:
-                fig.tight_layout(rect=[0.02, 0.02, 0.98, 0.92])                         # 全宽度布局
+                fig.tight_layout(rect=[0.02, 0.02, 0.98, 0.92])                         
             # plt.show()
 
         return fig
 
     def histogram(self, eFreqI: int, **kwargs) -> Figure:
         """Plot statistics for evaluation frequency index
-        绘制指定评估频率索引的统计量直方图
+        
         Plots a histogram of each statistic with bins on the xaxis and count on the yaxis. Ideal for exploring the distribution of statistic values over the windows.
-        绘制统计量的直方图，x轴为分箱值，y轴为计数。非常适合探索统计量在窗口上的分布特征
+        
         Parameters
         ----------
         eFreqI : int
@@ -572,79 +572,79 @@ class StatisticData(ResisticsBase):
         plt.figure
             Matplotlib figure object            
         """
-        # deal with maskwindows, which are global indices(处理掩码窗口，这些是全局索引)
+        # deal with maskwindows, which are global indices
         maskWindows = kwargs["maskwindows"] if "maskwindows" in kwargs else []
-        plotIndices = self.getUnmaskedIndices(maskWindows)                                              # 获取未被掩码的窗口索引
-        eFreq = self.evalFreq[eFreqI]                                                                   # 获取评估频率值
+        plotIndices = self.getUnmaskedIndices(maskWindows)                                              
+        eFreq = self.evalFreq[eFreqI]                                                                   
 
         # plot options(绘图选项)
-        numbins = kwargs["numbins"] if "numbins" in kwargs else 40                                      # 设置分箱数量，默认40个分箱
-        nrows, ncols = self.getRowsCols(self.maxcols)                                                   # 计算子图的行列布局(maxcols=4)
+        numbins = kwargs["numbins"] if "numbins" in kwargs else 40                                      
+        nrows, ncols = self.getRowsCols(self.maxcols)                                                   
 
-        plotfonts = kwargs["plotfonts"] if "plotfonts" in kwargs else getViewFonts()                    # 获取绘图字体配置，使用默认字体或用户指定字体
-        fig = (                                                                                         # 创建或复用图形对象
-            plt.figure(kwargs["fig"].number)                                                            # 复用现有图形
+        plotfonts = kwargs["plotfonts"] if "plotfonts" in kwargs else getViewFonts()                    
+        fig = (                                                                                         
+            plt.figure(kwargs["fig"].number)                                                            
             if "fig" in kwargs
-            else plt.figure(figsize=(4 * ncols, 4 * nrows))                                             # 创建新图形
+            else plt.figure(figsize=(4 * ncols, 4 * nrows))                                             
         )
-        st = fig.suptitle(                                                                              # 设置图形总标题
-            "{} data for evaluation frequency: {}".format(self.statName, eFreq),                  # 标题内容
-            fontsize=plotfonts["suptitle"],                                                             # 标题字体大小
+        st = fig.suptitle(                                                                              
+            "{} data for evaluation frequency: {}".format(self.statName, eFreq),                  
+            fontsize=plotfonts["suptitle"],                                                             
         )
-        st.set_y(0.98)                                                                                  # 调整标题垂直位置，避免与子图重叠
+        st.set_y(0.98)                                                                                  
 
-        # plot the data(绘制数据)
-        for idx, val in enumerate(self.winStats):                                                       # 遍历指定统计量的各分量(如cohExHx)
-            ax = plt.subplot(nrows, ncols, idx + 1)                                               # 创建子图，idx+1表示子图位置（从1开始）
-            plt.title("Value {}".format(val), fontsize=plotfonts["title"])                              # 设置子图标题
-            label = kwargs["label"] if "label" in kwargs else eFreq                                     # 设置图例标签，使用自定义标签或频率值
+        # plot the data
+        for idx, val in enumerate(self.winStats):                                                       
+            ax = plt.subplot(nrows, ncols, idx + 1)                                               
+            plt.title("Value {}".format(val), fontsize=plotfonts["title"])                              
+            label = kwargs["label"] if "label" in kwargs else eFreq                                     
 
             # data
-            plotData = np.squeeze(self.stats[:, eFreqI, idx])                                           # 提取指定频率和统计量的数据，并压缩维度
+            plotData = np.squeeze(self.stats[:, eFreqI, idx])                                           
             if plotIndices is not None:
-                plotData = plotData[plotIndices]                                                        # 如果存在掩码索引，则过滤数据
+                plotData = plotData[plotIndices]                                                        
             # remove infinities and nans
-            plotData = plotData[np.isfinite(plotData)]                                                  # 移除无穷大和NaN值，确保数据有效性
+            plotData = plotData[np.isfinite(plotData)]                                                  
 
-            # x axis options(x轴选项)
+            # x axis options
             xlim = (
-                kwargs["xlim"]                                                                          # 设置x轴范围，使用自定义范围或数据实际范围
+                kwargs["xlim"]                                                                          
                 if "xlim" in kwargs
-                else [np.min(plotData), np.max(plotData)]                                               # 数据最小最大值
+                else [np.min(plotData), np.max(plotData)]                                               
             )
-            plt.xlim(xlim)                                                                              # 应用x轴范围限制
-            plt.xlabel("Value", fontsize=plotfonts["axisLabel"])                                  # 设置x轴标签
-            # now plot with xlim in mind(现在考虑xlim范围进行绘图)
-            plt.hist(plotData, numbins, range=xlim, facecolor="red", alpha=0.75)                        # 绘制直方图(输入数据,分箱数量,数值范围,柱状图颜色,透明度)
-            # y axis options(y轴选项)
-            plt.ylabel("Count", fontsize=plotfonts["axisLabel"])                                  # 设置y轴标签
-            # set tick sizes(设置坐标轴刻度大小)
+            plt.xlim(xlim)                                                                              
+            plt.xlabel("Value", fontsize=plotfonts["axisLabel"])                                  
+            # now plot with xlim in mind
+            plt.hist(plotData, numbins, range=xlim, facecolor="red", alpha=0.75)                        
+            # y axis options
+            plt.ylabel("Count", fontsize=plotfonts["axisLabel"])                                  
+            # set tick sizes
             for label in ax.get_xticklabels() + ax.get_yticklabels():
                 label.set_fontsize(plotfonts["axisTicks"])
             plt.grid(True, ls="--")
-            # legend(图例)
+            # legend
             if "legend" in kwargs and kwargs["legend"]:
-                plt.legend(loc=4)                                                                       # 位置4表示右下角
+                plt.legend(loc=4)                                                                       
 
         # show if the figure is not in keywords
         if "fig" not in kwargs:
-            fig.tight_layout(rect=[0.02, 0.02, 0.98, 0.92])                                             # 调整布局，为图形元素留出边距
+            fig.tight_layout(rect=[0.02, 0.02, 0.98, 0.92])                                             
             # plt.show()
 
         return fig
 
     def crossplot(self, eFreqI: int, **kwargs) -> Figure:
         """Plots crossplots of statistic components for evaluation frequency index
-        绘制指定评估频率索引的统计量分量交叉图
+        
         Notes
         -----
-        By default, the crossplots plotted are                              默认情况下，绘制的交叉图是：
-        statistic component 1 vs statistic component 2                      统计量分量1(cohExHx) vs 统计量分量2(cohExHy)
-        statistic component 3 vs statistic component 4                      统计量分量3(cohEyHx) vs 统计量分量4(cohEyHy)
+        By default, the crossplots plotted are                              
+        statistic component 1 vs statistic component 2                      
+        statistic component 3 vs statistic component 4                      
         etc
 
         But crossplots can be explicity set by using the crossplots keyword. They should be specified as a list of a list of strings
-        e.g.    但可以通过crossplots关键字显式设置交叉图。应该指定为字符串列表的列表
+        e.g.    
         crossplots = [[component2, component3], [component1, component4]]
 
         Parameters
@@ -677,88 +677,88 @@ class StatisticData(ResisticsBase):
         plt.figure
             Matplotlib figure object            
         """
-        # deal with maskwindows, which are global indices(处理掩码窗口，这些是全局索引)
+        # deal with maskwindows, which are global indices
         maskWindows = kwargs["maskwindows"] if "maskwindows" in kwargs else []
-        plotIndices = self.getUnmaskedIndices(maskWindows)                                                  # 获取未被掩码的窗口索引
+        plotIndices = self.getUnmaskedIndices(maskWindows)                                                  
 
-        # figure out the crossplots(确定交叉图配对)
+        # figure out the crossplots
         if "crossplots" in kwargs:
-            crossplots = kwargs["crossplots"]                                                               # 如果用户指定了交叉图配对，使用用户指定的配对
+            crossplots = kwargs["crossplots"]                                                               
         else:
-            crossplots = list(zip(self.winStats[::2], self.winStats[1::2]))                                 # 否则使用默认配对：相邻分量配对
+            crossplots = list(zip(self.winStats[::2], self.winStats[1::2]))                                 
 
-        # plot parameters(绘图参数)
-        nrows, ncols = self.getRowsCols(self.maxcols, numStats=len(crossplots))                             # 计算子图的行列布局，基于交叉图数量
-        eFreq = self.evalFreq[eFreqI]                                                                       # 获取评估频率值
+        # plot parameters
+        nrows, ncols = self.getRowsCols(self.maxcols, numStats=len(crossplots))                             
+        eFreq = self.evalFreq[eFreqI]                                                                       
 
-        plotfonts = kwargs["plotfonts"] if "plotfonts" in kwargs else getViewFonts1()                       # 获取绘图字体配置
+        plotfonts = kwargs["plotfonts"] if "plotfonts" in kwargs else getViewFonts1()                       
         scatter_color = kwargs.get("plot_color")
-        fig = (                                                                                             # 创建或复用图形对象
+        fig = (                                                                                             
             plt.figure(kwargs["fig"].number)
             if "fig" in kwargs
-            else plt.figure(figsize=(5 * ncols, 5 * nrows))                                                 # 创建新图形,每个子图4×5英寸大小
+            else plt.figure(figsize=(5 * ncols, 5 * nrows))                                                 
         )
         st = fig.suptitle(
-            "{} : {:.4f} Hz".format(                                     # 设置图形总标题
+            "{} : {:.4f} Hz".format(                                     
                 self.statName, eFreq
             ),
             fontsize=plotfonts["suptitle"],
         )
         st.set_y(0.98)
 
-        # now plot the data(绘制数据)
-        for idx, cplot in enumerate(crossplots):                                                            # 遍历所有交叉图配对
-            ax = plt.subplot(nrows, ncols, idx + 1)                                                   # 创建子图，idx+1表示子图位置（从1开始）
+        # now plot the data
+        for idx, cplot in enumerate(crossplots):                                                            
+            ax = plt.subplot(nrows, ncols, idx + 1)                                                   
             cp = cplot[0]
             plt.title(
-                "Z{}{}".format(cp[1], cp[3]), fontsize=plotfonts["title"]                             # 设置子图标题，显示两个统计量的名称
+                "Z{}{}".format(cp[1], cp[3]), fontsize=plotfonts["title"]                             
             )
-            label = kwargs["label"] if "label" in kwargs else eFreq                                         # 设置图例标签(频率:0.1464844)
+            label = kwargs["label"] if "label" in kwargs else eFreq                                         
 
-            # # the colourdata(颜色数据计算)
+            # # the colourdata
             # colourbool, colourdata, cmap = self.calcColourData(
-            #     self.globalIndices, cplot[0], eFreqI, kwargs                                                # 全局索引,第一个统计量,频率索引,关键字参数
+            #     self.globalIndices, cplot[0], eFreqI, kwargs                                                
             # )
 
-            # get plot data(获取绘图数)
-            plotI1 = self.winStats.index(cplot[0])                                                          # 获取第一个统计量(如ExHyReal)的索引
-            plotData1 = np.squeeze(self.stats[:, eFreqI, plotI1])                                           # plotData1:ExHyReal实部数据,提取第一个统计量的数据，并压缩维度(self.stats[窗口数，频率索引，ExHyReal的索引])
-            plotI2 = self.winStats.index(cplot[1])                                                          # 获取第二个统计量(如ExHyImag)的索引
-            plotData2 = np.squeeze(self.stats[:, eFreqI, plotI2])                                           # plotData2:ExHyImag虚部数据,提取第二个统计量的数据，并压缩维度
-            if plotIndices is not None:                                                                     # 如果存在掩码索引，则过滤数据
-                plotData1 = plotData1[plotIndices]                                                          # 过滤第一个统计量数据
-                plotData2 = plotData2[plotIndices]                                                          # 过滤第二个统计量数据
-                # colourdata = colourdata[plotIndices]                                                      # 过滤颜色数据
+            # get plot data
+            plotI1 = self.winStats.index(cplot[0])                                                          
+            plotData1 = np.squeeze(self.stats[:, eFreqI, plotI1])                                           
+            plotI2 = self.winStats.index(cplot[1])                                                          
+            plotData2 = np.squeeze(self.stats[:, eFreqI, plotI2])                                           
+            if plotIndices is not None:                                                                     
+                plotData1 = plotData1[plotIndices]                                                          
+                plotData2 = plotData2[plotIndices]                                                          
+                # colourdata = colourdata[plotIndices]                                                      
 
-            # scatter plot(空心散点图)
+            # scatter plot
             scat = plt.scatter(
                 plotData1,
                 plotData2,
-                facecolors="none",                                                                          # 内部填充设为无色（空心）
-                edgecolors="tab:blue",                                                                      # 设置空心圆轮廓颜色（默认为经典蓝色，也可自定义如 "black"）
-                linewidths=1.0,                                                                             # 设置空心圆线条粗细
-                marker="o",                                                                                 # 圆形标记
-                s=18,                                                                                       # 建议稍微调大一点点，空心圆辨识度更好
+                facecolors="none",                                                                          
+                edgecolors="tab:blue",                                                                      
+                linewidths=1.0,                                                                            
+                marker="o",                                                                                 
+                s=18,                                                                                       
                 label=label,
             )
          
-            # x axis options(x轴选项)
-            plt.xlabel("Real(Z{}{})".format(cp[1], cp[3]), fontsize=plotfonts["axisLabel"], labelpad=0) # 设置x轴标签
+            # x axis options
+            plt.xlabel("Real(Z{}{})".format(cp[1], cp[3]), fontsize=plotfonts["axisLabel"], labelpad=0) 
             if "xlim" in kwargs:
-                plt.xlim(kwargs["xlim"])                                                                    # 设置x轴范围
-            # y axis options(y轴选项)
-            plt.ylabel("Imag(Z{}{})".format(cp[1], cp[3]), fontsize=plotfonts["axisLabel"], labelpad=0) # 设置y轴标签
+                plt.xlim(kwargs["xlim"])                                                                    
+            # y axis options
+            plt.ylabel("Imag(Z{}{})".format(cp[1], cp[3]), fontsize=plotfonts["axisLabel"], labelpad=0) 
             if "ylim" in kwargs:
-                plt.ylim(kwargs["ylim"])                                                                    # 设置y轴标签
-            # set tick sizes(设置坐标轴刻度大小)
+                plt.ylim(kwargs["ylim"])                                                                    
+            # set tick sizes
             for label in ax.get_xticklabels() + ax.get_yticklabels():
                 label.set_fontsize(plotfonts["axisTicks"])
-            plt.grid(True, ls="--")                                                                  # 添加网格线，虚线样式
-            # legend(图例)
+            plt.grid(True, ls="--")                                                                  
+            # legend
             if "legend" in kwargs and kwargs["legend"]:
-                plt.legend(loc=4)                                                                           # 位置4表示右下角
+                plt.legend(loc=4)                                                                           
 
-        # # show if the figure is not in keywords(如果图形不在关键字中，则显示)(颜色条)
+        # # show if the figure is not in keywords
         if "fig" not in kwargs:
             fig.tight_layout()
             # plt.show()
@@ -767,16 +767,16 @@ class StatisticData(ResisticsBase):
 
     def densityplot(self, eFreqI: int, **kwargs) -> Figure:
         """Plots density plots of statistic components for evaluation frequency index
-        绘制指定评估频率索引的统计量分量密度图
+        
         Notes
         -----
-        By default, the density plots plotted are                       默认情况下，绘制的交叉图是：
-        statistic component 1 vs statistic component 2                  统计量分量1(cohExHx) vs 统计量分量2(cohExHy)
-        statistic component 3 vs statistic component 4                  统计量分量3(cohEyHx) vs 统计量分量4(cohEyHy)
+        By default, the density plots plotted are                       
+        statistic component 1 vs statistic component 2                  
+        statistic component 3 vs statistic component 4                  
         etc
 
         But density plots can be explicity set by using the crossplots keyword. They should be specified as a list of a list of strings
-        e.g.    但可以通过crossplots关键字显式设置密度图。应该指定为字符串列表的列表
+        e.g.    
         crossplots = [[component2, component3], [component1, component4]]
 
         Parameters
@@ -807,92 +807,92 @@ class StatisticData(ResisticsBase):
         plt.figure
             Matplotlib figure object            
         """
-        # deal with maskwindows, which are global indices(处理掩码窗口，这些是全局索引)
+        # deal with maskwindows, which are global indices
         maskWindows = kwargs["maskwindows"] if "maskwindows" in kwargs else []
-        plotIndices = self.getUnmaskedIndices(maskWindows)                                              # 获取未被掩码的窗口索引
+        plotIndices = self.getUnmaskedIndices(maskWindows)                                              
 
-        # figure out the crossplots(确定密度图配对)
+        # figure out the crossplots
         if "crossplots" in kwargs:
-            crossplots = kwargs["crossplots"]                                                           # 如果用户指定了密度图配对，使用用户指定的配对
+            crossplots = kwargs["crossplots"]                                                           
         else:
-            crossplots = list(zip(self.winStats[::2], self.winStats[1::2]))                             # 如果用户指定了密度图配对，使用用户指定的配对
+            crossplots = list(zip(self.winStats[::2], self.winStats[1::2]))                             
 
-        # plot parameters(绘图参数)
-        nrows, ncols = self.getRowsCols(self.maxcols, numStats=len(crossplots))                         # 计算子图的行列布局，基于密度图配对数量
-        eFreq = self.evalFreq[eFreqI]                                                                   # 计算子图的行列布局，基于密度图配对数量
+        # plot parameters
+        nrows, ncols = self.getRowsCols(self.maxcols, numStats=len(crossplots))                         
+        eFreq = self.evalFreq[eFreqI]                                                                   
 
-        plotfonts = kwargs["plotfonts"] if "plotfonts" in kwargs else getViewFonts()                    # 获取绘图字体配置
-        fig = (                                                                                         # 创建或复用图形对象
-            plt.figure(kwargs["fig"].number)                                                            # 复用现有图形
+        plotfonts = kwargs["plotfonts"] if "plotfonts" in kwargs else getViewFonts()                    
+        fig = (                                                                                         
+            plt.figure(kwargs["fig"].number)                                                            
             if "fig" in kwargs
-            else plt.figure(figsize=(4 * ncols, 5 * nrows))                                             # 创建新图形
+            else plt.figure(figsize=(4 * ncols, 5 * nrows))                                             
         )
         st = fig.suptitle(
-            "{} density plots for evaluation frequency: {:.4f} Hz".format(                              # 设置图形总标题
-                self.statName, eFreq                                                              # 统计量名称和频率值
+            "{} density plots for evaluation frequency: {:.4f} Hz".format(                              
+                self.statName, eFreq                                                              
             ),
-            fontsize=plotfonts["suptitle"],                                                             # 标题字体大小
+            fontsize=plotfonts["suptitle"],                                                             
         )
-        st.set_y(0.98)                                                                                  # 调整标题垂直位置
+        st.set_y(0.98)                                                                                  
 
         # now plot the data(绘制数据)
-        for idx, cplot in enumerate(crossplots):                                                         # 遍历所有密度图配对
-            ax = plt.subplot(nrows, ncols, idx + 1)                                                # 创建子图，idx+1表示子图位置（从1开始）
+        for idx, cplot in enumerate(crossplots):                                                         
+            ax = plt.subplot(nrows, ncols, idx + 1)                                                
             plt.title(
-                "{} vs. {}".format(cplot[0], cplot[1]), fontsize=plotfonts["title"]                # 设置子图标题，显示两个统计量的名称
+                "{} vs. {}".format(cplot[0], cplot[1]), fontsize=plotfonts["title"]                
             )
-            label = kwargs["label"] if "label" in kwargs else eFreq                                      # 设置图例标签
+            label = kwargs["label"] if "label" in kwargs else eFreq                                      
 
             # get plot data(获取绘图数据)
-            plotI1 = self.winStats.index(cplot[0])                                                      # 获取第一个统计量(如cohExHy)的索引
-            plotData1 = np.squeeze(self.stats[:, eFreqI, plotI1])                                       # 提取第一个统计量的数据，并压缩维度
-            plotI2 = self.winStats.index(cplot[1])                                                      # 获取第二个统计量(如cohEyHx)的索引
-            plotData2 = np.squeeze(self.stats[:, eFreqI, plotI2])                                       # 提取第二个统计量的数据，并压缩维度
-            if plotIndices is not None:                                                                 # 如果存在掩码索引，则过滤数据
-                plotData1 = plotData1[plotIndices]                                                      # 过滤第一个统计量数据
-                plotData2 = plotData2[plotIndices]                                                      # 过滤第二个统计量数据
+            plotI1 = self.winStats.index(cplot[0])                                                      
+            plotData1 = np.squeeze(self.stats[:, eFreqI, plotI1])                                       
+            plotI2 = self.winStats.index(cplot[1])                                                      
+            plotData2 = np.squeeze(self.stats[:, eFreqI, plotI2])                                       
+            if plotIndices is not None:                                                                 
+                plotData1 = plotData1[plotIndices]                                                      
+                plotData2 = plotData2[plotIndices]                                                      
 
-            nbins = 200                                                                                 # 设置分箱数量(将创建200×200=40,000个网格单元)
+            nbins = 200                                                                                 
             if "xlim" in kwargs:
-                plt.xlim(kwargs["xlim"])                                                                # 如果用户指定了x轴范围，使用用户指定的范围
+                plt.xlim(kwargs["xlim"])                                                                
                 rangex = kwargs["xlim"]
-            else:                                                                                       # 否则使用数据的2%和98%分位数作为范围(排除极端值（前2%和后2%），避免异常值影响显示)
-                minx = np.percentile(plotData1, 2)                                                   # 2%分位数
-                maxx = np.percentile(plotData1, 98)                                                  # 98%分位数
+            else:                                                                                       
+                minx = np.percentile(plotData1, 2)                                                   
+                maxx = np.percentile(plotData1, 98)                                                  
                 plt.xlim(minx, maxx)
-                rangex = [minx, maxx]                                                                   # rangex用于二维直方图计算，确保显示和计算范围一致(0~1)
+                rangex = [minx, maxx]                                                                   
 
-            if "ylim" in kwargs:                                                                        # 如果用户指定了y轴范围，使用用户指定的范围
+            if "ylim" in kwargs:                                                                        
                 plt.ylim(kwargs["ylim"])
                 rangey = kwargs["ylim"]
             else:
-                miny = np.percentile(plotData2, 2)                                                  # 同上
+                miny = np.percentile(plotData2, 2)                                                  
                 maxy = np.percentile(plotData2, 98)
                 plt.ylim(miny, maxy)
                 rangey = [miny, maxy]
-            # 绘制二维直方图（密度图）
-            plt.hist2d(                                                                                 # 绘制二维直方图（密度图）
-                plotData1,                                                                              # x轴数据
-                plotData2,                                                                              # y轴数据
-                bins=(nbins, nbins),                                                                    # 分箱数量（x方向200，y方向200）
-                range=[rangex, rangey],                                                                 # 数据范围(x:0~1 y:0~1)
-                cmap=plt.cm.inferno,                                                                    # 颜色映射
+            
+            plt.hist2d(                                                                                 
+                plotData1,                                                                             
+                plotData2,                                                                              
+                bins=(nbins, nbins),                                                                    
+                range=[rangex, rangey],                                                                 
+                cmap=plt.cm.inferno,                                                                    
             )
 
-            # axis options(坐标轴设置)
-            plt.xlabel("Value {}".format(cplot[0]), fontsize=plotfonts["axisLabel"])                    # 设置x轴标签
-            plt.ylabel("Value {}".format(cplot[1]), fontsize=plotfonts["axisLabel"])                    # 设置y轴标签
-            # set tick sizes(设置坐标轴刻度大小)
+            # axis options
+            plt.xlabel("Value {}".format(cplot[0]), fontsize=plotfonts["axisLabel"])                   
+            plt.ylabel("Value {}".format(cplot[1]), fontsize=plotfonts["axisLabel"])                    
+            # set tick sizes
             for label in ax.get_xticklabels() + ax.get_yticklabels():
                 label.set_fontsize(plotfonts["axisTicks"])
-            plt.grid(True, ls="--")                                                              # 添加网格线
-            # legend(图例)
-            if "legend" in kwargs and kwargs["legend"]:                                                 # # 位置4表示右下角
-                plt.legend(loc=4)                                                                       # 位置4表示右下角
+            plt.grid(True, ls="--")                                                              
+            # legend
+            if "legend" in kwargs and kwargs["legend"]:                                                 
+                plt.legend(loc=4)                                                                       
 
-        # show if the figure is not in keywords(如果图形不在关键字中，则显示)
+        # show if the figure is not in keywords
         if "fig" not in kwargs:
-            fig.tight_layout(rect=[0.02, 0.02, 0.85, 0.92])                                             # 调整布局
+            fig.tight_layout(rect=[0.02, 0.02, 0.85, 0.92])                                             
             # plt.show()
 
         return fig
@@ -901,7 +901,7 @@ class StatisticData(ResisticsBase):
         self, plot: PathCollection, cax, title: str, plotfonts: Dict
     ) -> None:
         """Add a colourbar to a plot
-        为绘图添加颜色条
+        
         Parameters
         ----------
         plot : matplotlib.collections.PathCollection
@@ -913,12 +913,12 @@ class StatisticData(ResisticsBase):
         plotfonts : Dict
             A dictionary with font types as keys and sizes as values
         """
-        plt.colorbar(plot, cax=cax)                                                         # 在指定的坐标轴(cax)上为绘图(plot)创建颜色条
-        cax.set_title(title, y=1.02, fontsize=plotfonts["title"])                           # 在指定的坐标轴(cax)上为绘图(plot)创建颜色条
+        plt.colorbar(plot, cax=cax)                                                         
+        cax.set_title(title, y=1.02, fontsize=plotfonts["title"])                           
 
     def addColourbarDates(self, plot: PathCollection, cax, title: str, plotfonts: Dict):
         """Make the colourbar show dates for identifying window times where there is not date axis
-        创建显示日期的颜色条，用于在没有日期轴的图形中识别窗口时间
+        
         Parameters
         ----------
         plot : matplotlib.collections.PathCollection
@@ -930,11 +930,11 @@ class StatisticData(ResisticsBase):
         plotfonts : Dict
             A dictionary with font types as keys and sizes as values
         """
-        ticks, tickLabels = self.dateTicks(self.globalIndices, self.getGlobalDates(), 5)                # 获取5个均匀分布的刻度和对应的日期标签(self.globalIndices：全局窗口索引数组,self.getGlobalDates()：全局窗口日期数组,5：期望的刻度数量)
-        cb = plt.colorbar(plot, cax=cax)                                                                         # 在指定的坐标轴(cax)上为绘图(plot)创建颜色条
-        cb.set_ticks(ticks)                                                                                      # 使用计算得到的刻度位置设置颜色条
-        cb.set_ticklabels(tickLabels)                                                                            # 使用计算得到的日期标签设置颜色条刻度
-        cax.set_title(title, y=1.02, fontsize=plotfonts["title"])                                                # 在颜色条坐标轴上添加标题
+        ticks, tickLabels = self.dateTicks(self.globalIndices, self.getGlobalDates(), 5)                
+        cb = plt.colorbar(plot, cax=cax)                                                                         
+        cb.set_ticks(ticks)                                                                                      
+        cb.set_ticklabels(tickLabels)                                                                            
+        cax.set_title(title, y=1.02, fontsize=plotfonts["title"])                                                
 
     def dateTicks(self, gIndices, dates, timeNum):
         """Format dateticks
