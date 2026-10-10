@@ -391,7 +391,7 @@ class TimeReaderPhoenix(TimeReader):
 
     def getPhysicalSamples(self, **kwargs) -> TimeData:
         """Get data scaled to physical values
-        获取经物理值缩放后的数据
+        
         Parameters
         ----------
         chans : List[str]
@@ -419,22 +419,22 @@ class TimeReaderPhoenix(TimeReader):
             startSample=options["startSample"],
             endSample=options["endSample"],
         )
-        # need to remove the gain(去除增益（核心校准步骤）,每个通道循环处理)
+        # need to remove the gain
         for chan in options["chans"]:
             # remove the gain
-            timeData.data[chan] = 1.0 * timeData.data[chan] / self.getChanGain1(chan)         # 1.0确保结果为浮点数, timeData原始数据/getChanGain1()获取通道的第一级增益值
+            timeData.data[chan] = 1.0 * timeData.data[chan] / self.getChanGain1(chan)         
             timeData.addComment(
-                "Scaling channel {} with scalar {} to give mV".format(                 # 物理值(mV) = 原始值(计数) / 增益系数
-                    chan, 1.0 / self.getChanGain1(chan)             # 缩放因子 = 1 / 增益系数
+                "Scaling channel {} with scalar {} to give mV".format(                 
+                    chan, 1.0 / self.getChanGain1(chan)             
                 )
             )
 
-            # divide by distance in km(对电场分量的数据进行单位转换，将其从 mV（毫伏） 转换为 mV/km（毫伏每千米）),场强归一化
+            # divide by distance in km
             if chan == "Ex":
-                # multiply by 1000/self.getChanDx same as dividing by dist in km(将Ex通道数据从mV转换为mV/km),getChanDx(Ex) = 75
-                timeData.data[chan] = 1000 * timeData.data[chan] / self.getChanDx(chan)         # mV/m -> mV/km
+                # multiply by 1000/self.getChanDx same as dividing by dist in km
+                timeData.data[chan] = 1000 * timeData.data[chan] / self.getChanDx(chan)         
                 timeData.addComment(
-                    "Dividing channel {} by electrode distance {} km to give mV/km".format(      # 记录单位转换信息
+                    "Dividing channel {} by electrode distance {} km to give mV/km".format(      
                         chan, self.getChanDx(chan) / 1000.0
                     )
                 )
@@ -447,16 +447,16 @@ class TimeReaderPhoenix(TimeReader):
                     )
                 )
 
-            # if remove zeros - False by default(去除0值, 仅在remzeros=True时执行)
+            # if remove zeros - False by default
             if options["remzeros"]:
                 timeData.data[chan] = removeZerosSingle(timeData.data[chan])
-            # if remove nans - False by default(去除NaN无效值)
+            # if remove nans - False by default
             if options["remnans"]:
                 timeData.data[chan] = removeNansSingle(timeData.data[chan])
-            # remove the average from the data - True by default(减去数据的平均值（去直流分量DC offset）,移除直流偏移,使数据以零为中心,默认为True)
+            # remove the average from the data - True by default
             if options["remaverage"]:
-                timeData.data[chan] = timeData.data[chan] - np.average(             # 分别从每个通道的时域数据中减去其平均值，将数据中心化到零均值
-                    timeData.data[chan]                                             # np.average()：计算数组的算术平均值
+                timeData.data[chan] = timeData.data[chan] - np.average(             
+                    timeData.data[chan]                                             
                 )
 
         # add comments
