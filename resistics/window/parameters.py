@@ -58,9 +58,9 @@ class WindowParameters(ResisticsBase):
         config = loadConfig()
         self.minSize = config["Window"]["minwindowsize"]
         self.minOlap = config["Window"]["minoverlapsize"]
-        self.windowFactor = config["Window"]["windowfactor"]            # 窗口因子，控制窗口长度与采样率的关系
+        self.windowFactor = config["Window"]["windowfactor"]            
         self.overlapFraction = config["Window"]["overlapfraction"]
-        self.calcParameters(self.windowFactor, self.overlapFraction)    # 为多级抽取（降采样）的每个级别计算FFT窗口参数，不同采样率使用不同窗口大小，高频用短窗口，低频用长窗口。计算每层的窗口大小[512 512 ... 512] 和重叠率 [128 128 ... 128]
+        self.calcParameters(self.windowFactor, self.overlapFraction)    
 
     def getWindowSize(self, decLevel: int) -> int:
         """Get window size for decimation level
@@ -136,14 +136,14 @@ class WindowParameters(ResisticsBase):
 
     def calcParameters(self, windowFactor, overlapFraction) -> None:
         """Calculate window size and overlap for each decimation level based on minimum allowable parameters (minSize, minOlap)
-        计算每个抽取（降采样）级别的窗口大小和重叠大小，基于最小允许参数(minSize, minOlap)
+        
         The window and overlap sizes (number of samples) are calculated based on the following:
-        窗口大小和重叠大小（样本数）基于以下公式计算：
-        Window size = frequency at decimation level / windowFactor   窗口大小 = 降采样级别频率 / 窗口因子
-        Overlap size = Window size * overlapFraction                重叠大小 = 窗口大小 * 重叠比例(25%)
+        
+        Window size = frequency at decimation level / windowFactor   
+        Overlap size = Window size * overlapFraction               
 
         The window size is calculated based on the sampling frequency of the decimation level to ensure good frequency domain resolution
-        窗口大小是根据抽取级的采样频率来计算的，以确保良好的频率分辨率
+        
 
         Parameters
         ----------
@@ -152,17 +152,17 @@ class WindowParameters(ResisticsBase):
         overlapFraction : float
             Overlap size as a fraction of the window size
         """
-        # 这段代码是多级窗口参数计算的核心，为多级抽取（降采样）的每个级别计算FFT窗口参数，不同采样率使用不同窗口大小，高频用短窗口，低频用长窗口
-        self.windows = np.ones(shape=(self.decParams.numLevels), dtype=int)             # 用于存储每个抽取级别计算出的窗口大小（样本数）
-        self.overlaps = np.ones(shape=(self.decParams.numLevels), dtype=int)            # 用于存储每个抽取级别计算出的重叠样本数
-        decFreq = self.decParams.decFrequencies                                         # 获取每个抽取级别的采样频率数组[15,7.5,...]
-        for il in range(0, self.decParams.numLevels):                       # 遍历所有抽取级别，从0到numLevels-1
-            self.windows[il] = int(decFreq[il] / windowFactor)              # 计算当前级别的窗口大小：采样频率 / 窗口因子     15/2
+        
+        self.windows = np.ones(shape=(self.decParams.numLevels), dtype=int)             
+        self.overlaps = np.ones(shape=(self.decParams.numLevels), dtype=int)            
+        decFreq = self.decParams.decFrequencies                                        
+        for il in range(0, self.decParams.numLevels):                       
+            self.windows[il] = int(decFreq[il] / windowFactor)              
             if self.windows[il] < self.minSize:
-                self.windows[il] = self.minSize                             # 如果小于最小值，使用预设的最小窗口大小
-            self.overlaps[il] = int(self.windows[il] * overlapFraction)     # 计算当前级别的重叠大小：窗口大小 × 重叠比例
+                self.windows[il] = self.minSize                             
+            self.overlaps[il] = int(self.windows[il] * overlapFraction)    
             if self.overlaps[il] < self.minOlap:
-                self.overlaps[il] = self.minOlap                            # 如果小于最小值，使用预设的最小重叠大小
+                self.overlaps[il] = self.minOlap                            
 
     def printList(self) -> List[str]:
         """Class information as a list of strings
