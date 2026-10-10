@@ -18,15 +18,15 @@ from resistics.mask.io import MaskIO
 
 class WindowSelector(ResisticsBase):
     """Select windows for further processing
-    选择窗口以进行后续处理
+    
     Finds windows for further processing. Given more than one site, WindowSelector will find the shared windows. For example, when processing with a remote reference, WindowSelector will find the shared global windows (i.e. referenced to the project reference time) of the local site and the remote site.
-    定位用于后续处理的窗口。当涉及多个站点时，WindowSelector 会识别共享窗口。例如，在采用远程参考进行处理时，WindowSelector 将定位本地站点与远程站点的共享全局窗口（即相对于项目参考时间的窗口）
+    
     Shared windows will accept maskData when constraints are to be used. Further, datetime constraints can be added to the selection process, in the case where, for example, only night time data is to be processed.
-    当启用约束条件时，共享窗口将接收掩码数据（maskData）。此外，若需限定特定时间范围（例如仅处理夜间数据），可在选择过程中添加日期时间约束。
-    For datetime constraints, the order of priorities are: 针对日期时间约束，优先级顺序如下
-    1. datetime constraints 日期时间约束
-    2. date constraints 日期约束
-    3. time constraints 时间约束
+    
+    For datetime constraints, the order of priorities are: 
+    1. datetime constraints 
+    2. date constraints 
+    3. time constraints 
 
 
     Attributes
@@ -164,25 +164,25 @@ class WindowSelector(ResisticsBase):
         self.sites: List = []
         # shared indices(共享索引)
         self.sharedWindows: Dict = {}
-        # the masks to use for each site - there can be multiple masks for each site(各站点使用的掩码——每个站点可对应多个掩码)
+        # the masks to use for each site - there can be multiple masks for each site
         self.siteMasks: Dict[str, List[str]] = {}
-        # the spec files for each site at fs(每个站点在 fs 中的规格文件)
+        # the spec files for each site at fs
         self.siteSpecFolders: Dict = {}
         self.siteSpecReaders: Dict = {}
-        # global indices (ranges and sets)(全局索引（范围与集合）)
+        # global indices (ranges and sets)
         self.siteSpecRanges: Dict = {}
         self.siteGlobalIndices: Dict = {}
-        # spectra directory information(频谱目录信息)
+        # spectra directory information
         self.specdir = kwargs["specdir"] if "specdir" in kwargs else "spectra"      # self.specdir = kwargs["specdir"] 如果"specdir" in kwargs，否则self.specdir = "spectra"
         self.prepend: str = "spectra"
-        # time constraints: priority is datetimes > dates > times(时间限制：优先级为日期时间 > 日期 > 时间)
+        # time constraints: priority is datetimes > dates > times
         self.datetimes: Dict[int, List] = {}
         self.dates: Dict[int, List] = {}
         self.times: Dict[int, List] = {}
-        # dictionary for datetime constraints(日期时间约束字典)
+        # dictionary for datetime constraints
         self.datetimeConstraints: Dict[int, List] = {}
-        # set all datetime constraints to empty（将所有日期时间约束设置为空）
-        self.resetDatetimeConstraints()             # 重置日期时间约束
+        # set all datetime constraints to empty
+        self.resetDatetimeConstraints()             
 
     def getSharedWindowsLevel(self, declevel: int) -> Set:
         """Get the shared windows for a decimation level
@@ -216,7 +216,7 @@ class WindowSelector(ResisticsBase):
 
     def getWindowsForFreq(self, declevel: int, eIdx: int) -> Set:
         """Get the number of shared windows for a decimation level and evaluation frequency
-        获取给定抽取级别与评估频率对应的共享窗口数量
+        
         Parameters
         ----------
         declevel : int
@@ -227,21 +227,21 @@ class WindowSelector(ResisticsBase):
         Returns
         -------
         set
-            The shared windows for evaluation frequency eIdx at decimation level declevel 抽取(降采样)级别declevel下对应评估频率eIdx的共享窗口
+            The shared windows for evaluation frequency eIdx at decimation level declevel 
         """
-        sharedWindows = self.getSharedWindowsLevel(declevel)                                                                # 获取该分频级别下所有站点共有的窗口
-        # now mask for the particular frequency - mask for each given site(给每个特定频率进行掩码——给每个站点)
+        sharedWindows = self.getSharedWindowsLevel(declevel)                                                                
+        # now mask for the particular frequency - mask for each given site
         for s in self.sites:
-            for mask in self.siteMasks[s]:                                                                                  # 获取当前站点的所有掩码对象
-                # remove the masked windows from shared indices(从共享索引集中剔除经掩码标记的窗口)
-                sharedWindows = sharedWindows - mask.getMaskWindowsFreq(declevel, eIdx)                                     # 从共享窗口中移除被当前掩码标记的窗口(当前分频级别的当前频点,1个)
-        return sharedWindows                                                                                                # 返回最终的共享窗口集合
+            for mask in self.siteMasks[s]:                                                                                  
+                # remove the masked windows from shared indices
+                sharedWindows = sharedWindows - mask.getMaskWindowsFreq(declevel, eIdx)                                     
+        return sharedWindows                                                                                                
 
     def getUnmaskedWindowsLevel(self, declevel: int) -> Set:
         """Get unmasked windows for a decimation level
-        获取指定分频级别下的未掩码窗口
+        
         Calculate the number of non masked windows for the decimation level. This should speed up processing when constraints are applied.
-        计算分频级别的非掩码窗口数量。这应该在应用约束时加快处理速度
+        
         Parameters
         ----------
         declevel : int
@@ -252,10 +252,10 @@ class WindowSelector(ResisticsBase):
         set
             Unmasked windows for the decimation level
         """
-        indices = set()                                                                         # 创建一个空集合，用于存储该分频级别下所有未掩码窗口的全局索引
-        evalFreq = self.decParams.getEvalFrequenciesForLevel(declevel)                          # 从分频参数对象中获取指定分频级别的所有评估频率
-        for eIdx, eFreq in enumerate(evalFreq):                                                 # 遍历该分频级别下的所有评估频率
-            indices.update(self.getWindowsForFreq(declevel, eIdx))                              # 获取当前分频级别和频率索引对应的未掩码窗口unmaskedWindows集合(自动去重,取并集(每个频点各自的unmasked))
+        indices = set()                                                                         
+        evalFreq = self.decParams.getEvalFrequenciesForLevel(declevel)                          
+        for eIdx, eFreq in enumerate(evalFreq):                                                 
+            indices.update(self.getWindowsForFreq(declevel, eIdx))                              
         return indices
 
     def getDatetimeConstraints(self) -> Dict:
@@ -271,14 +271,14 @@ class WindowSelector(ResisticsBase):
 
     def getLevelDatetimeConstraints(self, declevel: int) -> List[List[datetime]]:
         """Get the datetime constraints for a decimation level
-        获取某个降采样级别的日期时间约束条件
+        
         Returns
         -------
         List[List[datetime]]
             Returns a list of datetime constraints, where each is a 2 element list with a start and stop 返回时间约束条件列表，其中每个约束条件为包含起始时间与结束时间的二元列表
         """
-        self.calcDatetimeConstraints()              # 计算全局日期时间约束条件
-        return self.datetimeConstraints[declevel]   # 返回时间约束条件二元列表
+        self.calcDatetimeConstraints()             
+        return self.datetimeConstraints[declevel]   
 
     def getMasks(self) -> Dict:
         """Get a dictionary with masks to use for each site in the window selector
@@ -325,9 +325,9 @@ class WindowSelector(ResisticsBase):
 
     def getSpecReaderBatches(self, declevel: int) -> Tuple[List, List]:
         """Batch the readers into wndow groups that can be read as required in a more efficient way
-        将读取器分批划分为窗口组，以实现按需高效读取。
+        
         First sorts all the site spectra files by global window range, putting them in ascending order. Loops over all the sites and constructs spectra batches to read in.
-        首先依据全局窗口范围对所有站点频谱文件进行升序排序；随后遍历所有站点，并构建光谱批次以读取。
+        
         Parameters
         ----------
         declevel : int
@@ -338,9 +338,9 @@ class WindowSelector(ResisticsBase):
         batches : List[Dict[str, All]]
             The list of batches
         """
-        # sort spectra files for the decimation level(针对降采样层级，对频谱文件进行排序)
+        # sort spectra files for the decimation level
         files: Dict[str, List[str]] = dict()
-        readers: Dict[str, List[SpectrumReader]] = dict()   # 读取器readers
+        readers: Dict[str, List[SpectrumReader]] = dict()   
         winStarts: Dict[str, List[int]] = dict()
         winStops: Dict[str, List[int]] = dict()
         for site in self.sites:
@@ -353,57 +353,57 @@ class WindowSelector(ResisticsBase):
                 tmpReaders.append(self.siteSpecReaders[site][declevel][specFile])
                 tmpStarts.append(specRange[0])
                 tmpStops.append(specRange[1])
-            # now sort on winstarts using zip(当前基于winstarts（窗口起始信息），通过zip（数据打包函数）实现排序)
-            zipped = list(zip(tmpStarts, tmpFiles, tmpReaders, tmpStops))       # 按开始时间排序
-            zipped.sort()           # # 按第一个元素（tmpStarts）排序
-            winStarts[site], files[site], readers[site], winStops[site] = zip(*zipped)      # 解压排序后的结果
+            # now sort on winstarts using zip
+            zipped = list(zip(tmpStarts, tmpFiles, tmpReaders, tmpStops))       
+            zipped.sort()           
+            winStarts[site], files[site], readers[site], winStops[site] = zip(*zipped)      
 
-        # create batches(创建批次，站点分组)
-        mainSite: str = self.sites[0]               # 主站点（参考站点）
-        otherSites: List[str] = self.sites[1:]      # 其他站点
-        # for saving batches(保存存储批次)
+        # create batches
+        mainSite: str = self.sites[0]               
+        otherSites: List[str] = self.sites[1:]      
+        # for saving batches
         batches: List[Dict[str, Any]] = list()
-        for mainIdx, mainStart in enumerate(winStarts[mainSite]):       # 遍历主站点的每个时间窗口
-            lastBatchWin = mainStart - 1                                # 上一个批次的结束位置
-            while True:                                                 # 在当前主窗口内寻找重叠批次
-                batch = dict()                                          # 创建新批次
-                batch["globalrange"] = [lastBatchWin + 1, winStops[mainSite][mainIdx]]      # 初始化批次范围（基于主站点当前窗口）
-                batch[mainSite] = readers[mainSite][mainIdx]            # 添加主站点数据
-                for site in otherSites:                                 # 寻找其他站点与当前批次的重叠(暂时没用上)
+        for mainIdx, mainStart in enumerate(winStarts[mainSite]):       
+            lastBatchWin = mainStart - 1                                
+            while True:                                                 
+                batch = dict()                                          
+                batch["globalrange"] = [lastBatchWin + 1, winStops[mainSite][mainIdx]]      
+                batch[mainSite] = readers[mainSite][mainIdx]            
+                for site in otherSites:                                 
                     for otherIdx, (start, stop) in enumerate(
                         zip(winStarts[site], winStops[site])
                     ):
                         if (
-                            start >= batch["globalrange"][1]            # 检查时间重叠条件
+                            start >= batch["globalrange"][1]            
                             or stop <= batch["globalrange"][0]
                         ):
-                            continue                                    # 无重叠，继续查找
-                        # else there is an overlap and it is the first overlap we are interested in(反之则存在重叠区间，且我们聚焦的是首个重叠区间)
-                        # amend the batch range as required(按需修正批次范围)
-                        if start > batch["globalrange"][0]:             # 有重叠，调整批次范围
-                            batch["globalrange"][0] = start             # 调整开始时间
+                            continue                                    
+                        # else there is an overlap and it is the first overlap we are interested in
+                        # amend the batch range as required
+                        if start > batch["globalrange"][0]:             
+                            batch["globalrange"][0] = start             
                         if stop < batch["globalrange"][1]:
-                            batch["globalrange"][1] = stop              # 调整结束时间
-                        batch[site] = readers[site][otherIdx]           # 添加该站点数据
-                        break                                           # 找到第一个重叠即停止
+                            batch["globalrange"][1] = stop              
+                        batch[site] = readers[site][otherIdx]           
+                        break                                           
 
-                # now need to decide if the batch is complete - the batch dict has an entry for every site and one globalrange(当前需校验批次是否完整：批次字典需包含所有站点对应的条目及一个全局范围条目)
-                if len(batch.keys()) == len(self.sites) + 1:            # 检查批次完整性，所有站点 + globalrange
-                    batches.append(batch)                               # 完整批次，保存
-                lastBatchWin = batch["globalrange"][1]                  # 更新位置，继续寻找下一个批次
+                # now need to decide if the batch is complete - the batch dict has an entry for every site and one globalrange
+                if len(batch.keys()) == len(self.sites) + 1:            
+                    batches.append(batch)                               
+                lastBatchWin = batch["globalrange"][1]                  
                 if lastBatchWin >= winStops[mainSite][mainIdx]:
-                    break                                               # 当前主窗口处理完成
-                # otherwise, continue in the while loop batching up(反之，则在while循环内继续执行批次构建)
+                    break                                               
+                # otherwise, continue in the while loop batching up
 
         # print information
         self.printText("Spectra batches")
-        for batchI, batch in enumerate(batches):        # 外层循环：遍历每个批次
+        for batchI, batch in enumerate(batches):        
             self.printText(
-                "SPECTRA BATCH {}, Window Range {}".format(batchI, batch["globalrange"])    # 输出批次基本信息
+                "SPECTRA BATCH {}, Window Range {}".format(batchI, batch["globalrange"])    
             )
-            for site in self.sites:                     # 内层循环：遍历批次中的每个站点
+            for site in self.sites:                     
                 self.printText(
-                    "SPECTRA BATCH {}, Site {}, Path {}, Window Range {}".format(                 # 输出站点详细信息
+                    "SPECTRA BATCH {}, Site {}, Path {}, Window Range {}".format(                 
                         batchI, site, batch[site].datapath, batch[site].getGlobalRange()
                     )
                 )
@@ -420,25 +420,25 @@ class WindowSelector(ResisticsBase):
         Returns 
         -------
         int 
-            The data size (number of points in the spectrum) at the decimation level 返回该抽取级别的数据大小（频谱点数）
+            The data size (number of points in the spectrum) at the decimation level 
         """
         # return data size of first file
         site = self.sites[0]
-        specReaders = self.siteSpecReaders[site][declevel]          # 从站点频谱读取器字典中获取指定抽取级别的读取器字典
+        specReaders = self.siteSpecReaders[site][declevel]          
         for sF in specReaders:
             return specReaders[sF].getDataSize()
 
     def setSites(self, sites: List[str]) -> None:
         """Set the sites for which to find the shared windows
-        设置用于查找共享窗口的站点集合
+        
         Parameters
         ----------
         sites : List[str]
             List of sites
         """
-        # first remove repeated sites(首先移除重复站点)
+        # first remove repeated sites
         sitesSet = set(sites)       # {'site1'}
-        sites = list(sitesSet)      # 转为列表
+        sites = list(sitesSet)      
         # now continue
         self.sites = sites
         for s in self.sites:
@@ -446,11 +446,11 @@ class WindowSelector(ResisticsBase):
             self.siteSpecFolders[s] = []
             self.siteSpecReaders[s] = {}
             self.siteSpecRanges[s] = {}
-            # use sets to hold gIndices(使用集合存储gIndices)
-            # optimised to find intersections(经优化以实现交集查找)
+            # use sets to hold gIndices
+            # optimised to find intersections
             self.siteGlobalIndices[s] = {}
-        # at the end, calculate global indices(最终计算全局索引)
-        self.calcGlobalIndices()            # 确定所有站点对应的全局索引
+        # at the end, calculate global indices
+        self.calcGlobalIndices()            
 
     def addDatetimeConstraint(
         self, start: str, stop: str, declevel: Union[List[int], int, None] = None
@@ -535,9 +535,9 @@ class WindowSelector(ResisticsBase):
 
     def addWindowMask(self, site: str, maskName: str) -> None:
         """Add a window mask
-        添加窗口掩码
+        
         This is a mask with values for each evaluation frequency.
-        这是一个包含每个评估频率值的掩码
+        
         Parameters
         ----------
         site : str
@@ -545,14 +545,14 @@ class WindowSelector(ResisticsBase):
         maskName : str
             The name of the mask
         """
-        siteData = self.projData.getSiteData(site)                                  # 获取指定站点的数据对象
-        maskIO = MaskIO(siteData.getSpecdirMaskPath(self.specdir))                  # 创建掩码IO对象，设置数据路径
-        maskData = maskIO.read(maskName, self.sampleFreq)                           # 读取指定名称和采样频率的掩码数据
-        self.siteMasks[site].append(maskData)                                       # 将掩码数据添加到站点的掩码列表中
+        siteData = self.projData.getSiteData(site)                                  
+        maskIO = MaskIO(siteData.getSpecdirMaskPath(self.specdir))                  
+        maskData = maskIO.read(maskName, self.sampleFreq)                           
+        self.siteMasks[site].append(maskData)                                       
 
     def resetDatetimeConstraints(self) -> None:
-        """Reset datetime constraints重置日期时间约束"""
-        # add a list for each decimation level(为每个抽取级别添加一个列表)
+        """Reset datetime constraints"""
+        # add a list for each decimation level
         for declevel in range(0, self.decParams.numLevels):
             self.datetimes[declevel] = []
             self.dates[declevel] = []
@@ -567,9 +567,9 @@ class WindowSelector(ResisticsBase):
 
     def calcSharedWindows(self):
         """Calculate shared windows between sites
-        计算各站点之间的共享窗函数区间
+        
         Calculates the shared windows between sites. Datetime constraints are applied. No masks are applied in this method. Masks are only applied when getting the windows for a particular evaluation frequency.
-        计算多站点间的共享窗函数区间。本过程已施加日期时间约束条件；本方法中未引入掩码操作，掩码仅在获取特定评估频率对应的窗函数区间时生效。
+        
         """
         if len(self.sites) == 0:
             self.printWarning(
@@ -577,27 +577,27 @@ class WindowSelector(ResisticsBase):
             )
             return False
 
-        # calculate datetime constraints(计算日期时间约束条件)
-        self.calcDatetimeConstraints()          # 计算全局日期时间约束条件
-        # initialise the sharedWindows with a set from one site(用一个站点的数据集初始化共享窗口（sharedWindows）)
+        # calculate datetime constraints
+        self.calcDatetimeConstraints()          
+        # initialise the sharedWindows with a set from one site
         sites = self.sites
         siteInit = sites[0]
         numLevels = self.decParams.numLevels
         for declevel in range(0, numLevels):
             self.sharedWindows[declevel] = self.siteGlobalIndices[siteInit][declevel]
-        # 下一步是对多个站点计算共享窗口
-        # now for each decimation level, calculate the shared windows(现在对于每个降采样级别，计算共享窗口)
-        for declevel in range(0, numLevels):                            # 遍历每个降采样层级
-            for site in self.sites:                                     # 遍历每个站点(目前只添加site1这一个站点)
-                self.sharedWindows[declevel] = self.sharedWindows[      # 计算当前层级所有站点的索引交集
-                    declevel                                            # 比如site1[1，2，3，4，5] site2[2,3,4] site3[3,4,5] 那么交集为[3,4]
-                ].intersection(self.siteGlobalIndices[site][declevel])  # intersection函数：取交集
+        
+        # now for each decimation level, calculate the shared windows
+        for declevel in range(0, numLevels):                            
+            for site in self.sites:                                     
+                self.sharedWindows[declevel] = self.sharedWindows[      
+                    declevel                                            
+                ].intersection(self.siteGlobalIndices[site][declevel])  
 
-        # apply time constraints(施加时间约束条件)
-        # time constraints should be formulated as a set(时间约束条件应被形式化为一个集合)
-        # and then, find the intersection again(随后，重新求解交集)
+        # apply time constraints
+        # time constraints should be formulated as a set
+        # and then, find the intersection again
         for declevel in range(0, numLevels):
-            constraints = self.getLevelDatetimeConstraints(declevel)        # 获取某个降采样级别的日期时间约束条件(暂时没有约束)
+            constraints = self.getLevelDatetimeConstraints(declevel)        
             if len(constraints) != 0:
                 datetimeIndices = set()
                 for dC in constraints:
@@ -631,8 +631,8 @@ class WindowSelector(ResisticsBase):
                 ].intersection(datetimeIndices)
 
     def calcGlobalIndices(self) -> None:
-        """Find all the global indices for the sites为所有站点的所有降采样层级，建立跨文件的全局索引映射，实现精确的数据定位和访问"""
-        # get all the spectra files with the correct sampling frequency(获取所有具有正确采样频率的频谱文件)
+        """Find all the global indices for the sites"""
+        # get all the spectra files with the correct sampling frequency
         for site in self.sites:
             siteData = self.projData.getSiteData(site)
             timeFilesFs = siteData.getMeasurements(self.sampleFreq)
@@ -645,56 +645,56 @@ class WindowSelector(ResisticsBase):
 
             self.siteSpecFolders[site] = specFoldersFs
 
-            # for each decimation level(针对每个降采样层级)
-            # loop through each of the spectra folders(遍历所有频谱文件夹)
-            # and find the global indices ranges for each decimation level(并确定各降采样层级对应的全局索引区间)
+            # for each decimation level
+            # loop through each of the spectra folders
+            # and find the global indices ranges for each decimation level
             numLevels = self.decParams.numLevels
             for declevel in range(0, numLevels):
-                # get the dictionaries ready(完成字典结构的初始化与数据加载)
+                # get the dictionaries ready
                 self.siteSpecReaders[site][declevel] = {}
                 self.siteSpecRanges[site][declevel] = {}
-                self.siteGlobalIndices[site][declevel] = set()      # 创建集合{}
-                # loop through spectra folders and figure out global indices(遍历所有频谱文件夹，确定各目标层级对应的全局索引区间)
+                self.siteGlobalIndices[site][declevel] = set()      
+                # loop through spectra folders and figure out global indices
                 for specFolder in self.siteSpecFolders[site]:
-                    # here, have to use the specdir option(此处需调用 specdir 参数选项)
+                    # here, have to use the specdir option
                     specReader = SpectrumReader(
                         os.path.join(siteData.specPath, specFolder, self.specdir)
                     )
-                    # here, use prepend to open the spectra file(这里，使用 prepend 打开频谱文件)
-                    check = specReader.openBinaryForReading(self.prepend, declevel)         # 检查spectra00.bin和00.info文件(第一次循环)是否存在
+                    # here, use prepend to open the spectra file
+                    check = specReader.openBinaryForReading(self.prepend, declevel)         
                     # if file does not exist, continue
                     if not check:
                         continue
-                    self.siteSpecReaders[site][declevel][specFolder] = specReader       # 频谱读取器的信息组织存储，将已初始化的频谱读取器对象存储到三级嵌套字典结构中，实现按站点、层级、文件夹的精确管理
-                    globalRange = specReader.getGlobalRange()           # [507, 3399] 2893个窗口，[64, 423] 360个窗口，[8, 51] 44个窗口
+                    self.siteSpecReaders[site][declevel][specFolder] = specReader      
+                    globalRange = specReader.getGlobalRange()           
                     self.siteSpecRanges[site][declevel][specFolder] = globalRange
-                    # and save set of global indices(并保存一组全局索引)
+                    # and save set of global indices
                     self.siteGlobalIndices[site][declevel].update(
-                        list(range(globalRange[0], globalRange[1] + 1))     # 保存每个窗口(单独)的全局索引{507, 508, ..., 3399}，{64, 65, ..., 423}
+                        list(range(globalRange[0], globalRange[1] + 1))     
                     )
 
     def calcDatetimeConstraints(self) -> None:
         """Calculate overall datetime constraints
-        计算全局日期时间约束条件
-        Priority order for datetime constraints is: 日期时间约束的优先级顺序是
-        1. datetime constraints 日期时间约束
-        2. date constraints 日期约束
-        3. time constraints 时间约束
+        
+        Priority order for datetime constraints is: 
+        1. datetime constraints 
+        2. date constraints 
+        3. time constraints 
         """
-        # calculate site dates if required(如有需要，计算各站点的日期时间区间)
-        siteDates = self.calcSiteDates()        # siteDates: [datetime.date(2023,10,22), datetime.date(2023,10,23)]
+        # calculate site dates if required
+        siteDates = self.calcSiteDates()        
 
-        # datetime constraints are for each decimation level（日期时间约束需针对每个降采样级别分别设置）
+        # datetime constraints are for each decimation level
         numLevels = self.decParams.numLevels
         for declevel in range(0, numLevels):
-            # calculate date and time constraints for each level(针对每个层级分别计算日期时间约束条件)
-            # begin with the datetime constraints - these have highest priority(以日期时间约束条件为起始步骤——该约束条件具有最高优先级)
+            # calculate date and time constraints for each level
+            # begin with the datetime constraints - these have highest priority
             self.datetimeConstraints[declevel] = self.datetimes[declevel]
 
-            # check to see whether any date and time constraints(检查是否有任何日期和时间约束)
+            # check to see whether any date and time constraints
             if len(self.dates[declevel]) == 0 and len(self.times[declevel]) == 0:
                 continue
-            # ************后面暂时没用上
+            
             dateConstraints = []
             if len(self.dates[declevel]) != 0:
                 # apply time constraints only on specified days
@@ -735,9 +735,9 @@ class WindowSelector(ResisticsBase):
 
     def calcSiteDates(self) -> List[datetime]:
         """Calculate a list of days that all the sites were operating
-        计算所有站点均处于运行状态的日期列表
+        
         This uses the siteStart and siteEnd datetimes, so does not take into account the start and end of actual time series measurements, which is taken into account later.
-        本步骤基于各站点的起始与终止日期时间（siteStart、siteEnd）进行计算，未纳入实际时间序列测量的起止时间；后者将在后续流程中予以考量
+        
         Returns
         -------
         List[datetime]
@@ -749,7 +749,7 @@ class WindowSelector(ResisticsBase):
             siteData = self.projData.getSiteData(site)
             starts.append(siteData.siteStart)
             stops.append(siteData.siteEnd)
-        # need all the dates between(需提取[两时间节点间]所有有效日期)
+        # need all the dates between
         d1 = max(starts).date()
         d2 = min(stops).date()
         if d1 > d2:
@@ -760,9 +760,9 @@ class WindowSelector(ResisticsBase):
         # now with d2 > d1
         siteDates = []
         delta = d2 - d1
-        # + 1 because inclusive of stop and start days(加1，因计算包含起始日与终止日)
+        # + 1 because inclusive of stop and start days
         for i in range(delta.days + 1):
-            siteDates.append(d1 + timedelta(days=i))        # siteDates: [datetime.date(2023,10,22), datetime.date(2023,10,23)]
+            siteDates.append(d1 + timedelta(days=i))        
         return siteDates
 
     def printList(self) -> List[str]:
