@@ -218,51 +218,51 @@ class SpectrumData(ResisticsBase):
         plt.figure
             Matplotlib figure object
         """
-        f = self.freqArray                                      # 从对象属性获取频率数组(257)
-        fig = (                                                 # 创建或复用图形对象
-            plt.figure(kwargs["fig"].number)                    # 如果提供了图形，复用它
+        f = self.freqArray                                      
+        fig = (                                                 
+            plt.figure(kwargs["fig"].number)                    
             if "fig" in kwargs
-            else plt.figure(figsize=(20, 2 * self.numChans))    # 否则创建新图形
+            else plt.figure(figsize=(20, 2 * self.numChans))    
         )
-        plotFonts = kwargs["plotfonts"] if "plotfonts" in kwargs else getViewFonts()        # 获取字体设置，或使用默认字体
-        color = kwargs["color"] if "color" in kwargs else None                              # 获取线条颜色
+        plotFonts = kwargs["plotfonts"] if "plotfonts" in kwargs else getViewFonts()        
+        color = kwargs["color"] if "color" in kwargs else None                              
         # suptitle
-        st = fig.suptitle(                                                                  # 设置图形总标题
-            "Spectra data from {} to {}".format(self.startTime, self.stopTime),       # 显示时间范围
-            fontsize=plotFonts["suptitle"],                                                 # 使用标题字体大小
+        st = fig.suptitle(                                                                  
+            "Spectra data from {} to {}".format(self.startTime, self.stopTime),       
+            fontsize=plotFonts["suptitle"],                                                 
         )
-        st.set_y(0.98)                                                                      # 调整标题位置，避免与子图重叠
+        st.set_y(0.98)                                                                      
         # now plot the data
-        dataChans = kwargs["chans"] if "chans" in kwargs else self.chans                    # 确定要绘制的通道
-        numPlotChans = len(dataChans)                                                       # 实际要绘制的通道数
-        for idx, chan in enumerate(dataChans):                                              # 循环绘制每个通道
-            ax = plt.subplot(numPlotChans, 1, idx + 1)                                # 创建子图：numPlotChans行1列，当前通道在idx+1位置
-            plt.title("Channel {}".format(chan), fontsize=plotFonts["title"])               # 设置子图标题
-            # plot the data（绘制数据）
-            if "label" in kwargs:                                                                   # 如果提供了标签
+        dataChans = kwargs["chans"] if "chans" in kwargs else self.chans                    
+        numPlotChans = len(dataChans)                                                       
+        for idx, chan in enumerate(dataChans):                                              
+            ax = plt.subplot(numPlotChans, 1, idx + 1)                                
+            plt.title("Channel {}".format(chan), fontsize=plotFonts["title"])               
+            # plot the data
+            if "label" in kwargs:                                                                   
                 plt.plot(
-                    f, np.absolute(self.data[chan]), color=color, label=kwargs["label"]       # X轴：频率数组。Y轴：通道数据的幅度(复数的模)。线条颜色。图例标签
+                    f, np.absolute(self.data[chan]), color=color, label=kwargs["label"]       
                 )
             else:
-                plt.plot(f, np.absolute(self.data[chan]), color=color)                      # 没有标签
-            # add frequency label(添加频率标签（只在最后一个子图）)
-            if idx == numPlotChans - 1:                                                           # 如果是最后一个通道
-                plt.xlabel("Frequency [Hz]", fontsize=plotFonts["axisLabel"])               # 添加标签Frequence[Hz]
-            # x axis options(X轴范围设置)
-            xlim = kwargs["xlim"] if "xlim" in kwargs else [f[0], f[-1]]                        # X轴范围设置,默认使用全频率范围
-            plt.xlim(xlim)                                                                      # 设置X轴范围
-            # y axis options(Y轴单位标签)
+                plt.plot(f, np.absolute(self.data[chan]), color=color)                      
+            # add frequency label
+            if idx == numPlotChans - 1:                                                           
+                plt.xlabel("Frequency [Hz]", fontsize=plotFonts["axisLabel"])               
+            # x axis options
+            xlim = kwargs["xlim"] if "xlim" in kwargs else [f[0], f[-1]]                        
+            plt.xlim(xlim)                                                                      
+            # y axis options
             if isElectric(chan):
-                plt.ylabel("[mV/km]", fontsize=plotFonts["axisLabel"])                  # 电场单位
+                plt.ylabel("[mV/km]", fontsize=plotFonts["axisLabel"])                  
             else:
-                plt.ylabel("[nT]", fontsize=plotFonts["axisLabel"])                     # 磁场单位
-            plt.grid()                                                                        # 添加网格
-            # set tick sizes(设置刻度字体大小)
+                plt.ylabel("[nT]", fontsize=plotFonts["axisLabel"])                     
+            plt.grid()                                                                        
+            # set tick sizes
             for label in ax.get_xticklabels() + ax.get_yticklabels():
                 label.set_fontsize(plotFonts["axisTicks"])
-            # legend(图例设置)
+            # legend
             if "legend" in kwargs and kwargs["legend"]:
-                plt.legend(loc=4)                                                             # 位置4：右下角
+                plt.legend(loc=4)                                                             
 
         # show if the figure is not in keywords
         if "fig" not in kwargs:
