@@ -4,10 +4,10 @@ import numpy as np
 
 def intdiv(nom: Union[int, float], div: Union[int, float]) -> int:
     """Return an integer result of division
-    返回整数除法结果
-    The division is expected to be exact and ensures an integer return rather than float.该除法运算预计是精确的，并确保返回整数而非浮点数
+    
+    The division is expected to be exact and ensures an integer return rather than float
     Code execution will exit if division is not exact
-    若除法运算不精确，代码执行将终止
+    
     Parameters
     ----------
     nom : int, float
@@ -35,9 +35,9 @@ def intdiv(nom: Union[int, float], div: Union[int, float]) -> int:
 
 def getFrequencyArray(fs: float, samples: int) -> np.ndarray:
     """Calculate the frequency array for a real fourier transform
-    计算实数傅里叶变换对应的频率数组
+    
     Frequency array goes from 0Hz to Nyquist. Nyquist = fs/2
-    率数组从 0 赫兹到奈奎斯特。奈奎斯特 = 采样率 / 2
+    
     Parameters
     ----------
     fs : float
@@ -50,8 +50,8 @@ def getFrequencyArray(fs: float, samples: int) -> np.ndarray:
     frequencies : np.ndarray
         Array of rfft frequencies
     """
-    nyquist: float = 1.0 * fs / 2.0                  # 根据采样定理，采样频率fs必须至少是信号最高频率的2倍，否则会出现混叠。
-    return np.linspace(0, nyquist, samples)     # np.linspace:在 0 Hz 到nyquist频率之间生成 samples个等间隔的点.例：0~7.5Hz之间生成fftData.size个频率点
+    nyquist: float = 1.0 * fs / 2.0                  
+    return np.linspace(0, nyquist, samples)     
 
 
 def forwardFFT(data: np.ndarray, norm: bool = True):
