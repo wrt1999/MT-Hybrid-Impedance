@@ -61,73 +61,73 @@ class MaskCalculator(ResisticsBase):
 
     def applyConstraints(self, site: str) -> None:
         """Apply the masking constraints to find windows to be excluded
-        应用掩码约束条件来找到需要排除的窗口
+        
         WindowsSelector will later exclude the masked windows before processing
-        窗口选择器将在后续处理中排除被掩码的窗口
+        
         Parameters
         ----------
         site : str
             The site in the project to mask
         """
-        # run through all the statfiles listed(遍历所列出的全部统计文件)
-        siteData = self.projData.getSiteData(site)                                                  # 获取站点数据对象
-        measurements = siteData.getMeasurements(self.sampleFreq)                                    # 获取该采样频率下的所有测量文件夹
-        evalFreqs = self.maskData.evalFreq                                                          # 获取所有评估频率
-        # create a single statisticIO instance to do the reading(创建一个statisticIO单实例以执行读取操作)
-        statIO = StatisticIO()                                                                      # 创建单个统计量IO实例用于读取数据
+        # run through all the statfiles listed
+        siteData = self.projData.getSiteData(site)                                                  
+        measurements = siteData.getMeasurements(self.sampleFreq)                                    
+        evalFreqs = self.maskData.evalFreq                                                          
+        # create a single statisticIO instance to do the reading
+        statIO = StatisticIO()                                                                      
         # loop over stats
-        for stat in self.maskData.stats:                                                            # 遍历所有统计量
+        for stat in self.maskData.stats:                                                            
             # loop over decimation levels
-            for iDec in range(0, self.maskData.numLevels):                                          # 遍历分频级别
+            for iDec in range(0, self.maskData.numLevels):                                          
                 # loop over measurement folders
-                for meas in measurements:                                                           # 遍历测量文件夹
+                for meas in measurements:                                                           
                     # try and open the file
-                    statIO.setDatapath(                                                             # 尝试打开统计量数据文件,设置统计量IO对象的数据路径
+                    statIO.setDatapath(                                                             
                         os.path.join(
                             siteData.getMeasurementStatPath(meas), self.specdir
                         )
                     )
-                    statData = statIO.read(stat, iDec)                                              # 读入文件,读取指定统计量和分频级别的数据
+                    statData = statIO.read(stat, iDec)                                              
                     if statData is None:
-                        # to next measurement(转到下一个测量文件)
+                        # to next measurement
                         self.printWarning(
-                            "No statistic data found for {}, measurement {} and decimation level {}".format(            # 如果没有找到数据，打印警告信息,并跳转到下一个测量文件夹
+                            "No statistic data found for {}, measurement {} and decimation level {}".format(            
                                 site, meas, iDec
                             )
                         )
                         continue
-                    numWindows = statData.numWindows                                                # 获取统计量数据中的窗口总数4243
-                    winStats = statData.winStats                                                    # 获取统计量分量的名称列表['cohExHx','cohExHy','cohEyHx','cohEyHy']
-                    for iW in range(0, numWindows):                                                 # 遍历所有时间窗口
-                        # now check each window(现在检查每个窗口的统计量值)
-                        winVals = statData.getStatLocal(iW)                                         # 获取当前窗口的局部统计量值winVals（二维数组4×4）
+                    numWindows = statData.numWindows                                                
+                    winStats = statData.winStats                                                    
+                    for iW in range(0, numWindows):                                                 
+                        # now check each window
+                        winVals = statData.getStatLocal(iW)                                         
                         # now loop over evaluation frequencies
-                        for eIdx, eFreq in enumerate(evalFreqs[iDec]):                              # 现在遍历当前分频级别的所有评估频率
-                            constraintCheck = True                                                  # 包含逻辑（使用与运算）
-                            constraintCheckInsideOut = False                                        # 排除逻辑（使用或运算）
-                            insideOutFlag = False                                                   # 标记是否使用了排除逻辑
-                            freqVal = winVals[eIdx]                                                 # 获取当前评估频率下的所有统计量分量值[cohExHx,cohExHy,cohEyHx,cohEyHy]
-                            for component in self.maskData.constraints[eFreq][stat]:                # 遍历当前频率和统计量的所有约束分量cohExHy
-                                index = winStats.index(component)                                               # 查找当前分量在统计量分量列表中的索引位置
-                                componentVal = freqVal[index]                                                   # 获取当前分量的具体数值cohExHy
-                                lowerLimit = self.maskData.constraints[eFreq][stat][component][0]               # 从约束数据中获取当前分量的下限阈值0.7
-                                upperLimit = self.maskData.constraints[eFreq][stat][component][1]               # 从约束数据中获取当前分量的上限阈值1.0
-                                test = (componentVal > lowerLimit) and (componentVal < upperLimit)              # 布尔类型,检查分量值是否在约束范围内（大于下限且小于上限）
+                        for eIdx, eFreq in enumerate(evalFreqs[iDec]):                              
+                            constraintCheck = True                                                  
+                            constraintCheckInsideOut = False                                        
+                            insideOutFlag = False                                                   
+                            freqVal = winVals[eIdx]                                                 
+                            for component in self.maskData.constraints[eFreq][stat]:                
+                                index = winStats.index(component)                                               
+                                componentVal = freqVal[index]                                                   
+                                lowerLimit = self.maskData.constraints[eFreq][stat][component][0]               
+                                upperLimit = self.maskData.constraints[eFreq][stat][component][1]               
+                                test = (componentVal > lowerLimit) and (componentVal < upperLimit)              
 
-                                if self.maskData.insideOut[eFreq][stat][component]:                             # 检查当前分量是否使用排除逻辑（InsideOut为True）
+                                if self.maskData.insideOut[eFreq][stat][component]:                             
                                     test = not test
-                                    constraintCheckInsideOut = constraintCheckInsideOut or test                 # 使用或运算累积排除逻辑的结果（任一条件满足即排除）
+                                    constraintCheckInsideOut = constraintCheckInsideOut or test                 
                                     insideOutFlag = True
                                 else:
-                                    constraintCheck = constraintCheck and test                                  # 如果是包含逻辑（默认），使用与运算累积结果（所有条件必须满足）
+                                    constraintCheck = constraintCheck and test                                  
         
-                            if insideOutFlag:                                                                   # 检查是否存在排除逻辑
-                                constraintCheck = constraintCheck and constraintCheckInsideOut                  # 如果存在排除逻辑，将包含逻辑和排除逻辑的结果进行与运算
+                            if insideOutFlag:                                                                   
+                                constraintCheck = constraintCheck and constraintCheckInsideOut                  
                             
-                            if not constraintCheck:                                                             # 检查约束检查是否失败（constraintCheck为False）
-                                # if the stat fails, add it - this is a list of windows to exclude(如果统计量检查失败，将该窗口添加到排除列表中)
-                                self.maskData.maskWindows[eFreq].add(                                           # 使用集合的add方法添加窗口的全局索引（自动去重）
-                                    statData.getGlobalIndex(iW)                                                 # 获取当前窗口的全局唯一索引
+                            if not constraintCheck:                                                             
+                                # if the stat fails, add it - this is a list of windows to exclude
+                                self.maskData.maskWindows[eFreq].add(                                           
+                                    statData.getGlobalIndex(iW)                                                 
                                 )
 
     def printList(self) -> List[str]:
