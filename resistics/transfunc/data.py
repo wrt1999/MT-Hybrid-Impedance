@@ -392,9 +392,9 @@ class TransferFunctionData(ResisticsBase):
         # add the legend(为每个子图添加图例和网格)
         for idx, pol in enumerate(polarisations):
             ax1 = plt.subplot(nrows, ncols, idx + 1 - plotNumMult * idx)            
-            # leg = plt.legend(loc="upper right", fontsize=plotfonts["legend"])            
-            # leg.get_frame().set_linewidth(0.0)                                          
-            # leg.get_frame().set_facecolor("w")                                          
+            leg = plt.legend(loc="upper right", fontsize=plotfonts["legend"])            
+            leg.get_frame().set_linewidth(0.0)                                          
+            leg.get_frame().set_facecolor("w")                                          
             # plt.grid(True, ls="--")                                             
             # ax2 = plt.subplot(nrows, ncols, ncols + idx + 1 - plotNumMult * idx)    
             # # leg = plt.legend(loc="upper right", fontsize=plotfonts["legend"])           
