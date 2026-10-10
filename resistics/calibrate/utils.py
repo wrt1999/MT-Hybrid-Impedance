@@ -6,7 +6,7 @@ from typing import List, Tuple
 
 def getKnownCalibrationFormats() -> Tuple[List, List]:
     """Return list of supported calibration formats and their extensions
-    返回支持的校准格式及其扩展名列表
+    
     Returns
     -------
     extensions : List
@@ -160,14 +160,14 @@ def rspxName(ext: str, sensor: str, serial: int, chopper: bool) -> List[str]:
         # not possible to get a sensor number
         return None
 
-    board = "HF"              # 默认 "HF"（高频板，斩波器关闭）
-    if chopper:               # 若 chopper=True 则设为 "LF"（低频板）
+    board = "HF"              
+    if chopper:               
         board = "LF"
-    sensorNum = int(sensor[3:5])        # 从传感器型号提取第4-5字符并转为整数, sensor="MFS06" → sensor[3:5]="06" → sensorNum=6
+    sensorNum = int(sensor[3:5])        
     names = []
-    names.append("TYPE-{:03d}_{}-ID-{:06d}.{}".format(sensorNum, board, serial, ext))        # 生成文件名，{:03d},3位数字，前导零补全,示例值6,输出效果006
-    names.append("TYPE-{:03d}_BB-ID-{:06d}.{}".format(sensorNum, serial, ext))               # {:06d}, 6位数字，前导零补全,示例值307,输出效果"000307"
-    return names   # 带电路板标识：TYPE-006_LF-ID-000307.txt  # 宽带模式：TYPE-006_BB-ID-000307.txt    # {}, 字符串插入,示例值"LF", 输出效果"LF"
+    names.append("TYPE-{:03d}_{}-ID-{:06d}.{}".format(sensorNum, board, serial, ext))        
+    names.append("TYPE-{:03d}_BB-ID-{:06d}.{}".format(sensorNum, serial, ext))               
+    return names   
 
 
 def defaultCalibration():
