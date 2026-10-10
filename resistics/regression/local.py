@@ -706,26 +706,26 @@ class LocalRegressor(ResisticsBase):
             # and then use chatterjee machler formula to estimate variances
             # this needs work - better to use an empirical bootstrap method, but this will do for now 
             
-            resids = np.absolute(observation - np.dot(predictors, out))         # 残差计算：使用最终阻抗估计计算所有原始数据点的残差。计算最终残差r=|y-Ax|：使用原始数据和最终阻抗估计
-            scale = sampleMAD0(                 # 计算标准差scale：标准差σ的稳健估计。使用样本中位数绝对偏差(MAD)估计残差尺度（稳健的标准差估计），MAD是标准差的一种稳健估计，对异常值不敏感。
-                resids                          # 稳健尺度估计：sampleMAD0使用中位数绝对偏差，对异常值稳健
-            )  # some measure of standard deviation, rather than using the standard deviation(采用某种标准差类的度量指标，而非直接使用标准差)
-            residsVar = scale * scale           # 计算方差residsVar：方差σ²的稳健估计。方差估计：residsVar作为误差方差的稳健估计。计算残差方差,方差 = 标准差的平方。Var(r) = σ²，其中σ是尺度估计。注意：这是稳健的方差估计，不是样本方差。
-            # 接下来对设计矩阵predictors的信息矩阵varPred的运算；对信息矩阵求逆，得到精度矩阵varPred；最后计算参数的方差-协方差矩阵varOut。
-            # varPred = np.dot(hermitianTranspose(predictors), weights*predictors) # need to fix this(注释方案使用加权版本，当前使用未加权版本)     # hermitianTranspose()：计算共轭转置（对复数数据）
-            varPred = np.dot(hermitianTranspose(predictors), predictors)                        # 计算predictors的信息矩阵矩阵。 XᵀX矩阵,其中X是predictors。在MT中：HᵀH，反映磁场数据的变异性及相关性
-            varPred = np.linalg.inv(varPred)  # this is a pxp matrix(这是一个 pxp 矩阵)           # 对信息矩阵求逆，得到精度矩阵，反映参数估计的精度。(XᵀX)⁻¹矩阵，参数协方差矩阵的核心部分。在MT中：反映阻抗估计的潜在精度，受磁场变异性的影响。
-            varOut = 1.91472 * residsVar * varPred                # 计算参数的方差-协方差矩阵varOut：使用稳健方差估计公式：Var(β) = k * σ² * (XᵀX)⁻¹,系数1.91472是针对MAD估计的校正因子，用于小样本校正。σ²=residsVar（残差方差）。MT中：阻抗估计的方差-协方差矩阵
-            varOut = np.diag(varOut).real  # this should be a real number   # 提取参数方差的对角线元素，并取实部。在MT中：每个阻抗元素的方差，如Var(Zxx), Var(Zxy)等
-            # if self.intercept:                                            # 非对角线: Cov(Zxx, Zxy) - 参数间的协方差
-            #     output[i] = out[1:]                                       # 对角线: Var(Zxx), Var(Zxy) - 各参数的方差
-            #     varOutput[i] = varOut[1:]                                 # 参数方差-协方差矩阵的结构：
-            # else:                                                         # Cov(β) = [[Var(Zxx),    Cov(Zxx, Zxy)]
-            #     output[i] = out                                           #           [Cov(Zxy, Zxx), Var(Zxy)]]
+            resids = np.absolute(observation - np.dot(predictors, out))         
+            scale = sampleMAD0(                 
+                resids                          
+            )  # some measure of standard deviation, rather than using the standard deviation
+            residsVar = scale * scale           
+            
+            # varPred = np.dot(hermitianTranspose(predictors), weights*predictors) # need to fix this
+            varPred = np.dot(hermitianTranspose(predictors), predictors)                        
+            varPred = np.linalg.inv(varPred)  # this is a pxp matrix           
+            varOut = 1.91472 * residsVar * varPred                
+            varOut = np.diag(varOut).real  # this should be a real number   
+            # if self.intercept:                                            
+            #     output[i] = out[1:]                                       
+            #     varOutput[i] = varOut[1:]                                 
+            # else:                                                         
+            #     output[i] = out                                           
             #     varOutput[i] = varOut
-            # 存储当前输出通道的估计结果
-            output[i] = out             # 阻抗估计（复数）
-            varOutput[i] = varOut       # 方差估计（实数）
+            
+            output[i] = out             
+            varOutput[i] = varOut       
 
         return output, varOutput
 
@@ -735,9 +735,9 @@ class LocalRegressor(ResisticsBase):
         self, numWindows: int, obs: np.ndarray, reg: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Ordinary least squares regression processing
-        普通最小二乘法回归处理
+        
         Perform ordinary least regression processing using observations and regressors for a single evaluation frequency. 
-        使用单个评估频率的观测值和回归量执行普通最小二乘回归处理
+        
         Parameters
         ----------
         numWindows : int
@@ -755,52 +755,52 @@ class LocalRegressor(ResisticsBase):
             The variance        
         """
         # create array for output
-        output = np.empty(shape=(self.outSize, self.inSize), dtype="complex")                       # 创建输出数组：output存储回归解（复数类型），形状为(输出维度, 输入维度)；
-        varOutput = np.empty(shape=(self.outSize, self.inSize), dtype="float")                      # varOutput存储方差（浮点类型）
+        output = np.empty(shape=(self.outSize, self.inSize), dtype="complex")                       
+        varOutput = np.empty(shape=(self.outSize, self.inSize), dtype="float")                      
         # solve
-        for i in range(0, self.outSize):                                                            # 遍历outSize个输出维度(Ex,Ey)
+        for i in range(0, self.outSize):                                                            
             observation = obs[i, :]
             predictors = reg[i, :, :]
             # save the output
-            out, resids, squareResid, rank, s = olsModel(                                           # 调用OLS模型求解回归系数：out=回归系数，resids=残差，squareResid=残差平方和，rank=矩阵秩，s=奇异值
-                predictors, observation, intercept=self.intercept                                   # 对所有窗口的功率谱统一最小二乘求解得到阻抗（2个：Zxx，Zxy）
+            out, resids, squareResid, rank, s = olsModel(                                           
+                predictors, observation, intercept=self.intercept                                   
             )            
             if self.intercept:
-                out = out[1:]                                                                       # 如果设置了截距项（intercept=True），olsModel返回的系数包含截距（第一个元素），需剔除截距只保留自变量系数
+                out = out[1:]                                                                       
 
-            # now calculate out the varainces - have the solution out, have the weights(现在计算出方差——得出解决方案，确定权重)
-            # recalculate out the residuals with the final solution(用最终解重新计算出残差)
-            # calculate standard deviation of residuals(计算残差的标准差)
-            # and then use chatterjee machler formula to estimate variances(然后使用chatterjee machler公式来估计方差)
-            # this needs work - better to use an empirical bootstrap method, but this will do for now(这还需要改进——最好使用经验自助法，但目前这样也凑合)
-            resids = np.absolute(observation - np.dot(predictors, out))                             # 重新计算残差：|观测值 - 预测值|（y-Ax）（预测值=回归系数×回归变量的线性组合）。np.dot做矩阵乘法（向量×矩阵）
+            # now calculate out the varainces - have the solution out, have the weights
+            # recalculate out the residuals with the final solution
+            # calculate standard deviation of residuals
+            # and then use chatterjee machler formula to estimate variances
+            # this needs work - better to use an empirical bootstrap method, but this will do for now
+            resids = np.absolute(observation - np.dot(predictors, out))                             
             scale = sampleMAD0(
-                resids                                                                              # 用样本MAD（中位数绝对偏差）估计残差的尺度参数（替代标准差，对异常值更稳健）
-            )  # some measure of standard deviation, rather than using the standard deviation(采用一定程度的标准差指标，而非直接使用标准差)
-            residsVar = scale * scale                                                               # 残差的方差 = 尺度参数的平方（将MAD转换为方差估计）
+                resids                                                                              
+            )  # some measure of standard deviation, rather than using the standard deviation
+            residsVar = scale * scale                                                               
             # varPred = np.dot(hermitianTranspose(predictors), weights*predictors) # need to fix this
-            varPred = np.dot(hermitianTranspose(predictors), predictors)                            # 计算预测变量矩阵的Hermitian转置（共轭转置，适用于复数矩阵；若为实数则与普通转置等价）与自身的乘积
-            varPred = np.linalg.inv(varPred)  # this is a pxp matrix(结果是p×p矩阵（p为预测变量个数）)   # varPred：设计矩阵的方差-协方差矩阵。对上述乘积矩阵求逆：得到(X^H X)^-1（X为预测变量矩阵，H表示Hermitian转置）
-            varOut = 1.91472 * residsVar * varPred                                                  # 计算回归系数的方差-协方差矩阵（应用 Chatterjee-Mächler 公式）。方差 = 常数1.91472 × 残差方差 × (X^H X)^-1 （注：此处公式可能为特定场景的经验修正）
-            varOut = np.diag(varOut).real  # this should be a real number                           # 提取对角线元素并取实部
+            varPred = np.dot(hermitianTranspose(predictors), predictors)                            
+            varPred = np.linalg.inv(varPred)  # this is a pxp matrix
+            varOut = 1.91472 * residsVar * varPred                                                  
+            varOut = np.diag(varOut).real  # this should be a real number                           
             # if self.intercept:
             #     output[i] = out[1:]
             #     varOutput[i] = varOut[1:]
             # else:
             #     output[i] = out
             #     varOutput[i] = varOut
-            output[i] = out                                                                         # 保存当前输出维度的回归系数和方差
+            output[i] = out                                                                         
             varOutput[i] = varOut            
 
         return output, varOutput
 
     def stackedProcess(self, data: np.ndarray) -> np.ndarray:
         """Ordinary least squares processing after stacking
-        叠加后的普通最小二乘处理
+        
         Parameters
         ----------
         data : np.ndarray
-            Cross-spectra data      功率谱数据
+            Cross-spectra data      
 
         Returns
         -------
@@ -810,38 +810,38 @@ class LocalRegressor(ResisticsBase):
             The variance        
         """
         # then do various sums
-        numWindows = data.shape[0]                                                              # 计算时间窗口数量：通过数据的第一个维度获取窗口总数
-        crossSize = len(self.crossChannels)                                                     # 获取通道的数量：即参与功率谱计算的通道数
+        numWindows = data.shape[0]                                                              
+        crossSize = len(self.crossChannels)                                                     
         # unweighted sum (i.e. normal solution)
-        unWeightedSum = np.sum(data, axis=0)                                                    # 计算未加权的和：对所有时间窗口的功率谱数据求和（沿第0轴）
-        unWeightedSum = unWeightedSum / numWindows                                              # 计算平均值：将总和除以窗口数量，得到平均功率谱矩阵
+        unWeightedSum = np.sum(data, axis=0)                                                    
+        unWeightedSum = unWeightedSum / numWindows                                              
 
-        # for each output variable, have ninput regressor variables(对于每个输出变量，都有n个输入回归变量。)
-        # let's construct our arrays(让我们构建我们的数组)
-        obs = np.empty(shape=(self.outSize, crossSize), dtype="complex")                        # 创建观测数据数组
-        reg = np.empty(shape=(self.outSize, crossSize, self.inSize), dtype="complex")           # 创建回归变量数组
-        for i in range(0, self.outSize):                                                        # 遍历所有输出维度['Ex','Ey']
-            for j, crossChan in enumerate(self.crossChannels):                                  # 遍历所有交叉通道['Hx','Hy','Ex','Ey']
-                crossIndex = self.allChannels.index(crossChan)                                  # 获取当前交叉通道在所有通道列表中的索引位置
-                obs[i, j] = unWeightedSum[self.inSize + i, crossIndex]                          # 从平均功率谱矩阵中提取观测数据obs
-                for k in range(0, self.inSize):                                                 # 遍历所有输入维度['Hx','Hy']
-                    reg[i, j, k] = unWeightedSum[k, crossIndex]                                 # # 从平均功率谱矩阵中提取回归变量reg
+        # for each output variable, have ninput regressor variables
+        # let's construct our arrays
+        obs = np.empty(shape=(self.outSize, crossSize), dtype="complex")                        
+        reg = np.empty(shape=(self.outSize, crossSize, self.inSize), dtype="complex")           
+        for i in range(0, self.outSize):                                                        
+            for j, crossChan in enumerate(self.crossChannels):                                  
+                crossIndex = self.allChannels.index(crossChan)                                  
+                obs[i, j] = unWeightedSum[self.inSize + i, crossIndex]                          
+                for k in range(0, self.inSize):                                                 
+                    reg[i, j, k] = unWeightedSum[k, crossIndex]                                 
 
         # create array for output
-        output = np.empty(shape=(self.outSize, self.inSize), dtype="complex")                   # 创建输出数组：用于存储回归系数x结果，复数类型
+        output = np.empty(shape=(self.outSize, self.inSize), dtype="complex")                   
 
-        for i in range(0, self.outSize):                                                        # 对每个输出维度进行稳健回归计算
-            observation = obs[i, :]                                                             # 提取当前输出维度的观测数据向量
-            predictors = reg[i, :, :]                                                           # 提取当前输出维度的预测变量矩阵
+        for i in range(0, self.outSize):                                                        
+            observation = obs[i, :]                                                             
+            predictors = reg[i, :, :]                                                           
             # save the output
-            out, resids, scale, weights = mmestimateModel(                                      # 调用MM估计稳健回归模型进行计算
-                predictors, observation, intercept=self.intercept                               # 返回：回归系数、残差、尺度参数(标准差)、权重
+            out, resids, scale, weights = mmestimateModel(                                      
+                predictors, observation, intercept=self.intercept                               
             )
             if self.intercept:
                 output[i] = out[1:]
             else:
                 output[i] = out
-        return output, output*0.1                                                               # 返回回归系数和方差估计（这里方差简单设为系数的10%）
+        return output, output*0.1                                                               
 
     def writeTF(
         self,
