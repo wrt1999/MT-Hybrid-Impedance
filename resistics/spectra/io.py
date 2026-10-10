@@ -105,15 +105,15 @@ class SpectrumReader(ResisticsBase):
         if not os.path.exists(self.datapath):
             self.printWarning("Directory {} does not exist".format(self.datapath))
         self.headerKeys: List[str] = [
-            "Reference time",           # 参考时间
-            "Sample frequency",         # 采样频率
-            "Window size",              # 窗口大小
-            "Window overlap",           # 窗口重叠
-            "Global offset",            # 全局偏移
-            "Number of windows",        # 窗口数量
-            "Number of channels",       # 通道数量
-            "Data size",                # 数据大小
-            "Channels",                 # 通道列表
+            "Reference time",           
+            "Sample frequency",         
+            "Window size",              
+            "Window overlap",           
+            "Global offset",            
+            "Number of windows",        
+            "Number of channels",       
+            "Data size",                
+            "Channels",                 
         ]
         self.headers: Dict = {}
         self.comments: List[str] = []
@@ -302,7 +302,7 @@ class SpectrumReader(ResisticsBase):
         filepathInfo = os.path.join(self.datapath, filebase + ".info")
         filepathComments = os.path.join(self.datapath, "comments.txt")
         self.filepath = os.path.join(self.datapath, filebase + ".bin")
-        # check files exist(查频谱数据文件.bin和相关信息文件.info是否存在，确保数据可访问性)
+        # check files exist
         if not os.path.exists(filepathInfo) or not os.path.exists(self.filepath):
             self.printWarning(
                 "No data found in either {} or {}".format(filepathInfo, self.filepath)
@@ -369,14 +369,14 @@ class SpectrumReader(ResisticsBase):
         self, globalIndices: Union[List[int], None] = None
     ) -> Tuple[List[SpectrumData], np.ndarray]:
         """Batch read binary windows
-        批量读取二进制窗口
+        
         Batch reading binary windows allows the data for calculation to be split over multi processes
-        批处理读取二进制窗口功能可将用于计算的数据分配到多个进程中
+        
         Parameters
         ----------
         globalIndices : List[int], None, optional
             The global indices to batch read. By default, all windows will be returned if not specified
-            用于批量读取的全局索引。若未指定该参数，默认返回所有窗口
+            
         Returns
         -------
         List[SpectrumData]
@@ -689,7 +689,7 @@ class SpectrumWriter(ResisticsBase):
         channels,
     ) -> None:
         """Write binary spectrum file 
-        写入二进制频谱文件
+        
         Parameters
         ----------
         filename : str
@@ -709,14 +709,14 @@ class SpectrumWriter(ResisticsBase):
         channels : List[str]
             Channels in data
         """
-        # sort channels alphabetically - matching the order in the data files(将通道按字母顺序排序——使其与数据文件中的顺序相对应)
+        # sort channels alphabetically - matching the order in the data files
         self.channels = sorted(channels)
 
-        checkAndMakeDir(self.datapath)                  # 检查目录是否存在，若不存在则创建
-        filebase: str = filename + "{:02d}".format(fileInc)         # 构建文件名，命名规则：基础名 + 2位数字层级编号（如00）
+        checkAndMakeDir(self.datapath)                  
+        filebase: str = filename + "{:02d}".format(fileInc)         
         # info file
-        filepathInfo: str = os.path.join(self.datapath, filebase + ".info")     # 创建信息文件（.info）
-        self.writeInfoFile(                     # 信息文件内容：文本格式，包含所有处理参数，目的：使二进制文件自描述，无需外部文档即可理解内容
+        filepathInfo: str = os.path.join(self.datapath, filebase + ".info")     
+        self.writeInfoFile(                     
             filepathInfo,
             sampleFreq,
             winSize,
@@ -725,7 +725,7 @@ class SpectrumWriter(ResisticsBase):
             numWindows,
             self.channels,
         )
-        # open file for data(打开二进制文件（.bin），文件模式："wb"（二进制写入）)
+        # open file for data
         self.filepath: str = os.path.join(self.datapath, filebase + ".bin")
         self.printText("Opening file {}".format(self.filepath))
         self.file = open(self.filepath, "wb")
@@ -819,7 +819,7 @@ class SpectrumWriter(ResisticsBase):
         channels: List[str],
     ) -> None:
         """Write info file 
-        写入info文件
+        
         Parameters
         ----------
         filepath : str
@@ -837,29 +837,29 @@ class SpectrumWriter(ResisticsBase):
         channels : List[str]
             Channels in data
         """
-        infoFile = open(filepath, "w")          # 打开文件，"w" 表示写入模式（覆盖已存在文件）
-        # write out header information(输出头部信息)
-        numChannels = len(channels)             # 通道数量
-        tmp = winSize + 1  # if winSize is odd, this will go down # 临时变量，用于计算数据大小
-        if winSize % 2 == 0:                # 如果窗口大小是偶数
+        infoFile = open(filepath, "w")          
+        # write out header information
+        numChannels = len(channels)             
+        tmp = winSize + 1  # if winSize is odd, this will go down 
+        if winSize % 2 == 0:                
             tmp = tmp + 1
-        dataSize = intdiv(tmp, 2)       # 计算数据大小，目的：计算频谱数据点数（通常为 winSize/2 + 1），原理：实数FFT的对称性，只需存储一半频率点 + DC分量
-        infoFile.write(                     # 写入基本参数
+        dataSize = intdiv(tmp, 2)       
+        infoFile.write(                     
             "Reference time = {}\nSample frequency = {:.8f}\nWindow size = {:d}\nWindow overlap = {:d}\nGlobal offset = {:d}\n".format(
-                self.refTime.strftime("%Y-%m-%d %H:%M:%S.%f"),      # 参考时间
-                sampleFreq,             # 采样频率（8位小数精度）
-                winSize,                # 窗口大小
-                winOverlap,             # 窗口重叠
-                globalOffset,           # 全局偏移
+                self.refTime.strftime("%Y-%m-%d %H:%M:%S.%f"),      
+                sampleFreq,             
+                winSize,                
+                winOverlap,             
+                globalOffset,           
             )
         )
-        # 写入统计信息
+        
         infoFile.write(
             "Number of windows = {:d}\nData size = {:d}\n".format(numWindows, dataSize)
         )
         infoFile.write("Number of channels = {:d}\n".format(numChannels))
         infoFile.write("Channels = " + " ".join(channels))
-        infoFile.close()        # 关闭文件，确保数据写入磁盘
+        infoFile.close()        
 
     def writeCommentsFile(self, comments: List[str]) -> None:
         """Write comments file 
