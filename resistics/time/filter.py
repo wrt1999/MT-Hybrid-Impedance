@@ -391,12 +391,12 @@ def downsampleData(
     data : Dict
         Dictionary with channel as keys and data as values
     """
-    # if downsampleFactor is 1, nothing to do(如果downsampleFactor为 1，则无需执行任何操作)
+    # if downsampleFactor is 1, nothing to do
     if downsampleFactor == 1:
         return data
 
-    # a downsample factor should not be greater than 13(降采样因子不应大于 13)
-    # hence factorise downsampleFactors that are greater than this(因此，需对大于该阈值13的降采样因子进行分解)
+    # a downsample factor should not be greater than 13
+    # hence factorise downsampleFactors that are greater than this
     if downsampleFactor > 13:
         downsamples = factorise(downsampleFactor)
         generalPrint(
@@ -408,11 +408,11 @@ def downsampleData(
     else:
         downsamples = [downsampleFactor]
 
-    # downsample for each factor in downsamples(针对downsamples集合中的每个因子执行降采样操作)
+    # downsample for each factor in downsamples
     for factor in downsamples:
         for c in data:
-            data[c] = signal.decimate(data[c], factor, zero_phase=True)                 # (这一步里进行数据降采样),将数据的采样率降低8倍，同时保持信号的完整性。通过抗混叠滤波 + 抽取，实现采样率降低。zero_phase=True：使用零相位滤波（避免相位失真）
-    return data                                                                         # 降采样的本质：有损变换。降采样不是简单的"抽点"
+            data[c] = signal.decimate(data[c], factor, zero_phase=True)                 
+    return data                                                                         
 
 
 def factorise(number: int):
