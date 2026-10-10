@@ -59,11 +59,11 @@ def getStatisticData(
         projectError("Unable to find site {} in project".format(site), quitRun=True)
 
     # load the statistic data
-    statIO = StatisticIO()                                                                      # 创建统计量IO对象，用于读取统计量数据文件
+    statIO = StatisticIO()                                                                      
     statIO.setDatapath(
-        os.path.join(siteData.getMeasurementStatPath(meas), options["specdir"])                 # 设置统计量IO对象的数据文件路径(D:\resistics\tutorial\tutorialProject\statData\site1\phnx_DZ12_15\spectra)
+        os.path.join(siteData.getMeasurementStatPath(meas), options["specdir"])                 
     )
-    statData = statIO.read(stat, declevel)                                                      # 读取指定统计量stat和分频级别declevel的数据(如transferFunction00.npy)
+    statData = statIO.read(stat, declevel)                                                      
     return statData
 
 def getStatisticDataAll(
@@ -90,33 +90,33 @@ def getStatisticDataAll(
         print("Unable to find site {} in project".format(site))
         return None
 
-    # 定义你需要遍历的所有方法对应的文件夹名称
-    # methods = ["LS", "M", "BI", "MD", "RMD"]
+    
+    
     methods = ["LS", "RMD"]
     statDataAll = {}
 
     # load the statistic data
-    statIO = StatisticIO()                                                                              # 创建统计量IO对象，用于读取统计量数据文件
-    base_spectra_path = os.path.join(siteData.getMeasurementStatPath(meas), options["specdir"])         # 设置统计量IO对象的数据文件路径(D:\resistics\tutorial\tutorialProject\statData\site1\phnx_DZ12_15\spectra)
+    statIO = StatisticIO()                                                                              
+    base_spectra_path = os.path.join(siteData.getMeasurementStatPath(meas), options["specdir"])         
 
-    # 循环遍历每种方法
+    
     for method in methods:
-        # 拼接具体方法的目录，例如: D:\resistics\tutorial\tutorialProject\statData\site1\phnx_ModEM0\spectra\OLS
+        
         method_datapath = os.path.join(base_spectra_path, method)
 
-        # 如果该方法的文件夹不存在，则跳过
+        
         if not os.path.exists(method_datapath):
             print(f"Warning: Directory not found, skipping {method}")
             continue
 
-        # 设置当前的 datapath 为特定方法的目录
+        
         statIO.setDatapath(method_datapath)
 
-        # 调用原生 read。由于 datapath 变了，它会自动去 .../spectra/OLS/transferFunction 寻找文件
-        statData = statIO.read(stat, declevel)                                                  # 读取指定统计量和分频级别的数据(如transferFunction00.npy)
+        
+        statData = statIO.read(stat, declevel)                                                  
 
         if statData is not None:
-            # 将读取到的 StatisticData 对象存入字典
+            
             statDataAll[method] = statData
 
     return StatisticDataAll(statDataAll)
@@ -184,7 +184,7 @@ def getStatisticDataForSampleFreq(
 
 def calculateStatistics(projData: ProjectData, **kwargs):
     """Calculate statistics for sites
-    为站点计算统计量
+    
     Parameters
     ----------
     projData : ProjectData
@@ -204,11 +204,11 @@ def calculateStatistics(projData: ProjectData, **kwargs):
     from resistics.project.shortcuts import getDecimationParameters
 
     options = {}
-    options["sites"] = projData.getSites()                                              # 默认处理所有站点
-    options["sampleFreqs"] = projData.getSampleFreqs()                                  # 默认所有采样频率
+    options["sites"] = projData.getSites()                                              
+    options["sampleFreqs"] = projData.getSampleFreqs()                                  
     options["chans"] = []
-    options["specdir"] = projData.config.configParams["Spectra"]["specdir"]             # 从配置获取频谱目录
-    options["stats"] = projData.config.configParams["Statistics"]["stats"]              # 从配置获取统计量列表
+    options["specdir"] = projData.config.configParams["Spectra"]["specdir"]             
+    options["stats"] = projData.config.configParams["Statistics"]["stats"]              
     options["ncores"] = projData.config.getStatisticCores()
     options = parseKeywords(options, kwargs)
 
@@ -218,13 +218,13 @@ def calculateStatistics(projData: ProjectData, **kwargs):
         )
     )
     # loop through sites and calculate statistics
-    statIO = StatisticIO()                                              # 初始化统计量IO对象,创建统计量读写器。
+    statIO = StatisticIO()                                              
     for site in options["sites"]:
-        siteData = projData.getSiteData(site)                           # 获取站点数据对象
-        measurements = siteData.getMeasurements()                       # 获取站点文件
+        siteData = projData.getSiteData(site)                           
+        measurements = siteData.getMeasurements()                       
 
-        for meas in measurements:                                       # 循环处理站点的每个测量
-            sampleFreq = siteData.getMeasurementSampleFreq(meas)        # 获取测量的采样频率15.0
+        for meas in measurements:                                       
+            sampleFreq = siteData.getMeasurementSampleFreq(meas)        
             if sampleFreq not in options["sampleFreqs"]:
                 continue
             projectText(
@@ -232,100 +232,73 @@ def calculateStatistics(projData: ProjectData, **kwargs):
             )
             decParams = getDecimationParameters(sampleFreq, projData.config)
             numLevels = decParams.numLevels
-            specReader = SpectrumReader(                                                            # 创建频谱数据读取器
-                os.path.join(siteData.getMeasurementSpecPath(meas), options["specdir"])             # 构建频谱文件路径,频谱目录
-            )                                                                                       # 读取器创建：SpectrumReader负责读取二进制频谱数据
+            specReader = SpectrumReader(                                                            
+                os.path.join(siteData.getMeasurementSpecPath(meas), options["specdir"])             
+            )                                                                                       
 
-            # calculate statistics for decimation level if spectra file exists(若频谱文件已存在，则针对降采样层级计算统计量)
-            for declevel in range(0, numLevels):                                                    # 循环处理每个抽取级别
-                check = specReader.openBinaryForReading("spectra", declevel)                # 尝试打开该级别的.bin频谱文件，check：True
-                if not check:                                                                       # 如果文件不存在，跳过该级别
+            # calculate statistics for decimation level if spectra file exists
+            for declevel in range(0, numLevels):                                                    
+                check = specReader.openBinaryForReading("spectra", declevel)                
+                if not check:                                                                       
                     continue
                 refTime = specReader.getReferenceTime()
                 winSize = specReader.getWindowSize()
                 winOlap = specReader.getWindowOverlap()
                 numWindows = specReader.getNumWindows()
-                sampleFreqDec = specReader.getSampleFreq()                                          # 获取当前抽取级别的采样频率
-                evalFreq = decParams.getEvalFrequenciesForLevel(declevel)                           # 获取当前层级的评估频率（实际计算的频率点）
+                sampleFreqDec = specReader.getSampleFreq()                                          
+                evalFreq = decParams.getEvalFrequenciesForLevel(declevel)                           
 
-                # dictionary for saving statistic data(创建统计量数据存储字典)
+                # dictionary for saving statistic data
                 statData = {}
-                for stat in options["stats"]:                                                       # 循环并初始化每个统计量
-                    statElements = getStatElements(stat)                                            # 获取该统计量的组成元素（如相干性需要指定通道对）
-                    statData[stat] = StatisticData(                                                 # 创建统计量数据对象(里面有成图的最大列数maxcols:4)
+                for stat in options["stats"]:                                                       
+                    statElements = getStatElements(stat)                                            
+                    statData[stat] = StatisticData(                                                 
                         stat, refTime, sampleFreqDec, winSize, winOlap
                     )
-                    statData[stat].setStatParams(numWindows, statElements, evalFreq)                # 设置统计量参数(窗口数,统计量元素,评估频率)
-                    statData[stat].comments = specReader.getComments()                              # 添加注释信息，频谱文件的注释
-                    statData[stat].addComment(projData.config.getConfigComment())                   # 配置文件的注释
-                    statData[stat].addComment("Calculating statistic: {}".format(stat))             # 统计量的注释
+                    statData[stat].setStatParams(numWindows, statElements, evalFreq)                
+                    statData[stat].comments = specReader.getComments()                              
+                    statData[stat].addComment(projData.config.getConfigComment())                   
+                    statData[stat].addComment("Calculating statistic: {}".format(stat))             
                     statData[stat].addComment(
-                        "Statistic components: {}".format(listToString(statElements))               # 统计量元素的注释
+                        "Statistic components: {}".format(listToString(statElements))               
                     )
-                # get all the spectra data in batch and process all the windows(批量获取所有频谱数据并处理全部窗口)
-                spectraData, globalIndices = specReader.readBinaryBatchGlobal()                     # 批量读取所有窗口的频谱数据（提高IO效率）
-                if options["ncores"] > 0:                                                           # 如果设置了多核并行计算
-                    out = multiStatistics(                                                          # 使用多核并行计算统计量
-                        options["ncores"], spectraData, evalFreq, options["stats"]                  # 使用的核心数，频谱数据数组，评估频率，要计算的统计量列表
+                # get all the spectra data in batch and process all the windows
+                spectraData, globalIndices = specReader.readBinaryBatchGlobal()                     
+                if options["ncores"] > 0:                                                           
+                    out = multiStatistics(                                                          
+                        options["ncores"], spectraData, evalFreq, options["stats"]                  
                     )
-                    for iW in range(numWindows):                                                    # 处理并行计算的结果，遍历每个窗口
-                        for stat in options["stats"]:                                               # 遍历每个统计量
-                            statData[stat].addStat(iW, globalIndices[iW], out[iW][stat])            # 将结果添加到统计量数据对象。iW窗口索引，globalIndices全局索引，out并行计算的结果
+                    for iW in range(numWindows):                                                    
+                        for stat in options["stats"]:                                               
+                            statData[stat].addStat(iW, globalIndices[iW], out[iW][stat])            
                 else:
-                    statCalculator = StatisticCalculator()                                          # 创建统计量计算器并初始化（可复用），避免重复创建对象
-                    # ====================================================================================================
-                    # 【核心修改区】：引入跨窗口的滑动数据块机制(一段时间，不是单独的一个窗口)
-                    # ====================================================================================================
-                    # blockSize = 50  # 建议块大小50-100，保证样本数 n 远大于变量数 p
-                    #
-                    # for start_idx in range(0, numWindows, blockSize):
-                    #     end_idx = min(start_idx + blockSize, numWindows)
-                    #     # 如果尾部剩余窗口太少（低于4个），则抛弃，避免自由度坍塌
-                    #     if end_idx - start_idx < 4:
-                    #         continue
-                    #
-                    #     # 切片获取当前块的所有频域窗口数据
-                    #     block_spectra = spectraData[start_idx:end_idx]
-                    #
-                    #     # 执行跨窗块回归计算
-                    #     blockStatData = calculateBlockStatistics(
-                    #         block_spectra,
-                    #         evalFreq,
-                    #         options["stats"],
-                    #         statCalculator=statCalculator,
-                    #     )
-                    #
-                    #     # 散点图只需要记录点集，我们将计算得出的"块结果"记在块起始窗口的位置上
-                    #     for stat in options["stats"]:
-                    #         statData[stat].addStat(
-                    #             start_idx, globalIndices[start_idx], blockStatData[stat]
-                    #         )
-                    # =======================================================================================================
-                    # 原本代码(单个窗口)
-                    for iW in range(numWindows):                                                    # 遍历每个窗口进行串行计算
-                        winSpecData = spectraData[iW]                                               # 计算当前窗口的频谱数据
-                        winStatData = calculateWindowStatistics(                                    # ※计算当前窗口的统计量(其中transferfuction用的普通最小二乘ols)
-                            winSpecData,                                                            # 单个时间窗口的频谱数据
-                            evalFreq,                                                               # 评估频率数组
-                            options["stats"],                                                       # 要计算的统计量名称列表
-                            statCalculator=statCalculator,                                          # 可选的统计量计算器（可复用）
+                    statCalculator = StatisticCalculator()                                          
+                
+                    
+                    for iW in range(numWindows):                                                    
+                        winSpecData = spectraData[iW]                                               
+                        winStatData = calculateWindowStatistics(                                   
+                            winSpecData,                                                            
+                            evalFreq,                                                               
+                            options["stats"],                                                       
+                            statCalculator=statCalculator,                                          
                         )
-                        # 将结果添加到统计量数据
+                        
                         for stat in options["stats"]:
                             statData[stat].addStat(
-                                iW, globalIndices[iW], winStatData[stat]                            # 窗口索引,全局时间索引,该窗口的统计量结果
+                                iW, globalIndices[iW], winStatData[stat]                            
                             )
 
-                specReader.closeFile()                                                              # 关闭频谱文件.bin（释放资源）
+                specReader.closeFile()                                                              
 
-                # save statistic(保存计算好的统计量数据)
+                # save statistic
                 for stat in options["stats"]:
-                    statIO.setDatapath(                                                             # 设置统计量保存路径
+                    statIO.setDatapath(                                                             
                         os.path.join(
-                            siteData.getMeasurementStatPath(meas), options["specdir"]               # 统计量路径,频谱目录（作为子目录）
+                            siteData.getMeasurementStatPath(meas), options["specdir"]               
                         )
                     )
-                    statIO.write(statData[stat], declevel)                                          # 写入统计量数据到文件.npy,按抽取级别保存。
+                    statIO.write(statData[stat], declevel)                                          
 
 
 def calculateRemoteStatistics(projData: ProjectData, remoteSite: str, **kwargs):
@@ -486,14 +459,14 @@ def calculateRemoteStatistics(projData: ProjectData, remoteSite: str, **kwargs):
                     statIO.write(statData[stat], declevel)
 
 def calculateBlockStatistics(
-    block_spectra: List[Any],                                               # 滑动窗口的频谱数据
-    evalFreq: np.ndarray,                                                   # 评估频率数组
-    stats: List[str],                                                       # 要计算的统计量名称列表
-    remoteSpecData: Union[SpectrumData, None] = None,                       # 可选的远程参考频谱数据
-    statCalculator: Union[StatisticCalculator, None] = None,                # 可选的统计量计算器
-) -> Dict[str, Any]:                                                        # 可选的统计量计算器
-    """Calculate the statistics for a block of windows (跨窗口统计)
-    滑动时间窗口的统计量
+    block_spectra: List[Any],                                               
+    evalFreq: np.ndarray,                                                   
+    stats: List[str],                                                       
+    remoteSpecData: Union[SpectrumData, None] = None,                       
+    statCalculator: Union[StatisticCalculator, None] = None,                
+) -> Dict[str, Any]:                                                        
+    """Calculate the statistics for a block of windows 
+    
     This method is meant to be used with multiprocessing
     这个方法专为多进程并行计算设计
     Parameters
@@ -510,24 +483,24 @@ def calculateBlockStatistics(
         Provide a statistic calculator to avoid multiple creation of objects
     """
     if statCalculator is None:
-        statCalculator = StatisticCalculator()                                          # 如果未提供统计量计算器，则创建一个新的StatisticCalculator实例
-    statCalculator.setSpectra(winSpecData.freqArray, winSpecData, evalFreq)  # ※计算功率谱(矩阵)，设置频谱数据到统计量计算器。winSpecData.freqArray：原始频谱的频率点数组。winSpecData：频谱数据对象（包含各通道的复数频谱）。evalFreq：评估频率数组（实际计算统计量的频率点）。
+        statCalculator = StatisticCalculator()                                          
+    statCalculator.setSpectra(winSpecData.freqArray, winSpecData, evalFreq)  
     data = {}
-    for stat in stats:                                                                  # 遍历所有要计算的统计量
-        data[stat] = statCalculator.blockTransferFunction(block_spectra, evalFreq)                            # 计算单个对应统计量的数据并存储到字典
+    for stat in stats:                                                                  
+        data[stat] = statCalculator.blockTransferFunction(block_spectra, evalFreq)                            
     return data
 
 def calculateWindowStatistics(
-    winSpecData: SpectrumData,                                              # 单个时间窗口的频谱数据
-    evalFreq: np.ndarray,                                                   # 评估频率数组
-    stats: List[str],                                                       # 要计算的统计量名称列表
-    remoteSpecData: Union[SpectrumData, None] = None,                       # 可选的远程参考频谱数据
-    statCalculator: Union[StatisticCalculator, None] = None,                # 可选的统计量计算器
-) -> Dict[str, Any]:                                                        # 可选的统计量计算器
+    winSpecData: SpectrumData,                                              
+    evalFreq: np.ndarray,                                                   
+    stats: List[str],                                                       
+    remoteSpecData: Union[SpectrumData, None] = None,                       
+    statCalculator: Union[StatisticCalculator, None] = None,                
+) -> Dict[str, Any]:                                                        
     """Calculate the statistics for a single window
-    计算单个时间窗口的统计量
+    
     This method is meant to be used with multiprocessing
-    这个方法专为多进程并行计算设计
+    
     Parameters
     ----------
     winSpecData : SpectrumData
@@ -542,14 +515,14 @@ def calculateWindowStatistics(
         Provide a statistic calculator to avoid multiple creation of objects
     """
     if statCalculator is None:
-        statCalculator = StatisticCalculator()                                          # 如果未提供统计量计算器，则创建一个新的StatisticCalculator实例
-    statCalculator.setSpectra(winSpecData.freqArray, winSpecData, evalFreq)             # ※计算功率谱(矩阵)，设置频谱数据到统计量计算器。winSpecData.freqArray：原始频谱的频率点数组。winSpecData：频谱数据对象（包含各通道的复数频谱）。evalFreq：评估频率数组（实际计算统计量的频率点）。
+        statCalculator = StatisticCalculator()                                          
+    statCalculator.setSpectra(winSpecData.freqArray, winSpecData, evalFreq)             
     if remoteSpecData is not None:
-        statCalculator.addRemoteSpec(remoteSpecData)                                    # 如果提供了远程参考频谱数据，则添加远参考频谱数据到计算器
+        statCalculator.addRemoteSpec(remoteSpecData)                                    
     data = {}
-    for stat in stats:                                                                  # 遍历所有要计算的统计量
-        data[stat] = statCalculator.getDataForStatName(stat)                            # 计算单个对应统计量的数据并存储到字典
-    return data                                                                         # 返回统计量数据字典
+    for stat in stats:                                                                  
+        data[stat] = statCalculator.getDataForStatName(stat)                            
+    return data                                                                         
 
 
 def multiStatistics(
