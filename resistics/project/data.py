@@ -309,61 +309,61 @@ class ProjectData(ResisticsBase):
         import numpy as np
         from resistics.common.plot import getPlotFonts
 
-        figsize = kwargs["figsize"] if "figsize" in kwargs else (15, 8)                     # 获取或设置图形尺寸，默认15×8英寸适合时间线显示
-        plotFonts = kwargs["plotFonts"] if "plotFonts" in kwargs else getPlotFonts()        # 获取字体设置，使用默认绘图字体
-        show = kwargs["show"] if "show" in kwargs else True                                 # 控制是否显示图形，批量处理时可设为False
-        # 创建图形和坐标轴对象
-        fig = plt.figure(figsize=figsize)               # 创建指定尺寸的图形
-        ax = plt.subplot(1, 1, 1)                 # 创建单个子图（1行1列第1个）
-        # get xlimits(计算X轴显示范围：参考时间前后各延长1天)
-        xStart = self.refTime - timedelta(days=1)       # 参考时间前1天
-        xEnd = self.projEnd + timedelta(days=1)         # 项目结束时间后1天
-        # 获取测站数量，用于确定Y轴范围
+        figsize = kwargs["figsize"] if "figsize" in kwargs else (15, 8)                     
+        plotFonts = kwargs["plotFonts"] if "plotFonts" in kwargs else getPlotFonts()        
+        show = kwargs["show"] if "show" in kwargs else True                                 
+        
+        fig = plt.figure(figsize=figsize)               
+        ax = plt.subplot(1, 1, 1)                 
+        # get xlimits
+        xStart = self.refTime - timedelta(days=1)       
+        xEnd = self.projEnd + timedelta(days=1)         
+        
         numSites = len(self.sites)
-        height = 0.4            # 每个矩形的高度,设置每个测站时间条的高度（相对单位）
-        for idx, site in enumerate(self.sites):                                             # 遍历所有测站，绘制时间条（矩形）
-            idx = numSites - idx                                                            # 反转索引：从下到上排列测站（numSites-idx）
-            siteStart = mdates.date2num(self.siteData[site].siteStart)                      # 将日期转换为Matplotlib的数值格式（便于绘图）,测站开始时间
-            siteEnd = mdates.date2num(self.siteData[site].siteEnd)                          # 测站结束时间
-            siteWidth = siteEnd - siteStart                                                 # 计算时间条宽度（天数）
-            yOffset = 0.5 + height                                                          # 计算Y轴位置：使矩形在索引位置居中显示（Y轴偏移量，确保居中）
-            rect = Rectangle((siteStart, idx - yOffset), siteWidth, 2 * height)         # 创建矩形对象：(x, y, width, height)，x=开始时间, y=索引位置-偏移量, width=持续时间, height=2*height
-            ax.add_patch(rect)                                                              # 将矩形添加到坐标轴
-        # plot the reference line(绘制参考时间线（红色垂直线）)
+        height = 0.4            
+        for idx, site in enumerate(self.sites):                                             
+            idx = numSites - idx                                                            
+            siteStart = mdates.date2num(self.siteData[site].siteStart)                      
+            siteEnd = mdates.date2num(self.siteData[site].siteEnd)                          
+            siteWidth = siteEnd - siteStart                                                 
+            yOffset = 0.5 + height                                                          
+            rect = Rectangle((siteStart, idx - yOffset), siteWidth, 2 * height)         
+            ax.add_patch(rect)                                                              
+        # plot the reference line
         plt.plot(
-            [self.refTime, self.refTime], [0, numSites], color="lightcoral", ls="-"     # X坐标：参考时间（相同）,Y坐标：从底部到顶部,颜色：浅珊瑚红,线型：实线
+            [self.refTime, self.refTime], [0, numSites], color="lightcoral", ls="-"     
         )
         plt.text(
-            self.refTime, 0.02, "  Reference Time", fontsize=plotFonts["axisTicks"]     # 添加参考时间标签,X位置：参考时间位置,Y位置：靠近底部（2%位置）,标签文本（前面有空格增加间距）,使用刻度字体大小
+            self.refTime, 0.02, "  Reference Time", fontsize=plotFonts["axisTicks"]     
         )
-        # x axis formatting(X轴主刻度设置：按周定位)
-        weeks = mdates.WeekdayLocator()                                     # 按周定位刻度
-        weeksFmt = mdates.DateFormatter("%Y-%m-%d")                         # 日期格式：年-月-日
-        days = mdates.DayLocator()                                          # 按天定位（次要刻度）
-        ax.xaxis.set_major_locator(weeks)                                   # 主刻度：每周
-        ax.xaxis.set_major_formatter(weeksFmt)                              # 主刻度标签格式
-        ax.xaxis.set_minor_locator(days)                                    # 次要刻度：每天
-        plt.xlim([xStart, xEnd])                                            # 设置X轴范围
-        ax.xaxis.grid(True, which="minor", ls="--", color="gainsboro")      # 添加次要刻度网格线（天网格）
-        plt.xlabel("Date", fontsize=plotFonts["axisLabel"])           # X轴标签
-        fig.autofmt_xdate(rotation=30)                                      # 自动格式化日期标签（避免重叠）,旋转30度
+        # x axis formatting
+        weeks = mdates.WeekdayLocator()                                     
+        weeksFmt = mdates.DateFormatter("%Y-%m-%d")                         
+        days = mdates.DayLocator()                                          
+        ax.xaxis.set_major_locator(weeks)                                   
+        ax.xaxis.set_major_formatter(weeksFmt)                              
+        ax.xaxis.set_minor_locator(days)                                    
+        plt.xlim([xStart, xEnd])                                            
+        ax.xaxis.grid(True, which="minor", ls="--", color="gainsboro")      
+        plt.xlabel("Date", fontsize=plotFonts["axisLabel"])           
+        fig.autofmt_xdate(rotation=30)                                      
         for label in ax.get_xticklabels():
-            label.set_fontsize(plotFonts["axisTicks"])                      # 设置X轴刻度标签字体大小
+            label.set_fontsize(plotFonts["axisTicks"])                      
         # y axis formatting
-        plt.ylim([0, numSites])                                             # 设置Y轴范围：从0到测站数量
-        yticks = np.arange(1, numSites + 1)                                 # 生成1到numSites的数组,设置主刻度位置：每个整数值（1, 2, 3...）
-        ax.set_yticks(yticks)                                               # 应用主刻度
-        ax.set_yticklabels([])                                              # 隐藏主刻度标签（不显示数字）
-        ax.set_yticks(yticks - 0.5, minor=True)                             # 次要刻度位置,在每个主刻度中间（0.5, 1.5, 2.5...）
-        ax.set_yticklabels(                                                 # 设置次要刻度标签为测站名称（反转顺序以匹配矩形位置）
-            self.sites[::-1], minor=True, fontsize=plotFonts["axisTicks"]   # 测站名称列表（反转）,作为次要刻度标签,字体大小
+        plt.ylim([0, numSites])                                             
+        yticks = np.arange(1, numSites + 1)                                 
+        ax.set_yticks(yticks)                                               
+        ax.set_yticklabels([])                                              
+        ax.set_yticks(yticks - 0.5, minor=True)                             
+        ax.set_yticklabels(                                                 
+            self.sites[::-1], minor=True, fontsize=plotFonts["axisTicks"]   
         )
-        ax.yaxis.grid(True, which="major", ls="--", color="gainsboro")      # 添加主刻度网格线（水平线）
-        plt.ylabel("Sites", fontsize=plotFonts["axisLabel"], labelpad=20)   # Y轴标签（增加间距避免与测站名重叠）
+        ax.yaxis.grid(True, which="major", ls="--", color="gainsboro")      
+        plt.ylabel("Sites", fontsize=plotFonts["axisLabel"], labelpad=20)   
         # title
-        plt.title("Project Timeline", fontsize=plotFonts["title"])      # 添加图形标题
+        plt.title("Project Timeline", fontsize=plotFonts["title"])      
 
-        fig.tight_layout()                                                   # 自动调整布局（避免元素重叠）
+        fig.tight_layout()                                                   
         if show:
             plt.show()
         return fig
