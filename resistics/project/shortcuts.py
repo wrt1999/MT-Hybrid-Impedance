@@ -51,18 +51,18 @@ def getDecimationParameters(
     DecimationParams
         A decimation parameters object        
     """
-    decParams = DecimationParameters(sampleFreq)        # deciamtion参数
+    decParams = DecimationParameters(sampleFreq)        
     if config is None:
         return decParams
 
-    if config.flags["customfrequencies"]:               # 根据配置标志，选择两种不同的降采样参数设置方式
-        decParams.setFrequencyParams(                                       # （自定义频率）：当用户提供了自定义频率列表时，使用这些特定频率进行降采样
+    if config.flags["customfrequencies"]:               
+        decParams.setFrequencyParams(                                       
             config.configParams["Frequencies"]["frequencies"],
             config.configParams["Decimation"]["numlevels"],
             config.configParams["Frequencies"]["perlevel"],
         )
     else:
-        decParams.setDecimationParams(                                      # 自动频率）：当用户没有提供自定义频率时，自动生成合适的频率序列
+        decParams.setDecimationParams(                                      
             config.configParams["Decimation"]["numlevels"],
             config.configParams["Frequencies"]["perlevel"],
         )
@@ -90,16 +90,16 @@ def getWindowParameters(
     if config is None:
         return winParams
 
-    # set window factor and overlap fraction(设置窗口因子和重叠比例)
+    # set window factor and overlap fraction
     winParams.windowFactor = config.configParams["Window"]["windowfactor"]
     winParams.overlapFraction = config.configParams["Window"]["overlapfraction"]
 
-    if config.flags["customwindows"]:                 # 是否使用自定义窗口(默认不使用)
+    if config.flags["customwindows"]:                 
         winParams.setWindowParameters(
             config.configParams["Window"]["windowsizes"],
             config.configParams["Window"]["overlapsizes"],
         )
-    else:                                             # 使用配置文件里的默认数据
+    else:                                             
         winParams.setMinParams(
             config.configParams["Window"]["minwindowsize"],
             config.configParams["Window"]["minoverlapsize"],
@@ -135,7 +135,7 @@ def getWindowSelector(
         specdir = projData.config.configParams["Spectra"]["specdir"]
 
     selector = WindowSelector(
-        projData, decParams.sampleFreq, decParams, winParams, specdir=specdir           # 初始化窗口选择器
+        projData, decParams.sampleFreq, decParams, winParams, specdir=specdir           
     )
     return selector
 
@@ -159,7 +159,7 @@ def getLocalRegressor(
     LocalRegressor
         local, single site regression        
     """
-    processor = LocalRegressor(winSelector, outPath)    # 初始化processor，大地电磁传输函数transferfunction处理器的初始化，专门用于站点阻抗张量计算。
+    processor = LocalRegressor(winSelector, outPath)    
     if config is None:
         return processor
     return processor
