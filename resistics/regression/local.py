@@ -703,9 +703,9 @@ class LocalRegressor(ResisticsBase):
             # now calculate out the varainces - have the solution out, have the weights 
             # recalculate out the residuals with the final solution 
             # calculate standard deviation of residuals 
-            # and then use chatterjee machler formula to estimate variances（基于Chatterjee-Machler公式估计方差var）
-            # this needs work - better to use an empirical bootstrap method, but this will do for now (本方法仍需优化——采用经验自助法更为理想，但当前方案可作为临时替代)
-            # 使用基于中位数绝对偏差（MAD）的稳健尺度估计来计算残差方差，并据此推导阻抗张量的方差协方差矩阵
+            # and then use chatterjee machler formula to estimate variances
+            # this needs work - better to use an empirical bootstrap method, but this will do for now 
+            
             resids = np.absolute(observation - np.dot(predictors, out))         # 残差计算：使用最终阻抗估计计算所有原始数据点的残差。计算最终残差r=|y-Ax|：使用原始数据和最终阻抗估计
             scale = sampleMAD0(                 # 计算标准差scale：标准差σ的稳健估计。使用样本中位数绝对偏差(MAD)估计残差尺度（稳健的标准差估计），MAD是标准差的一种稳健估计，对异常值不敏感。
                 resids                          # 稳健尺度估计：sampleMAD0使用中位数绝对偏差，对异常值稳健
