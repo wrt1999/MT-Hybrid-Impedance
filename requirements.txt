@@ -1,1 +1,3 @@
-
+Anaconda 22.9.0
+Python 3.9
+resisitcs 0.0.6
