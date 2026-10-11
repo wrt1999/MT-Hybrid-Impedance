@@ -62,9 +62,9 @@ class Calibrator(ResisticsBase):
 
     def __init__(self, calDirectory: str) -> None:
         """Set the calibration directory and initialise
-        设置标定目录并进行初始化
+        
         Calibrator will automatically find calibration files in the provided directory
-        标定器会自动在提供的目录中查找标定文件
+        
         Parameters
         ----------
         calDirectory : str
